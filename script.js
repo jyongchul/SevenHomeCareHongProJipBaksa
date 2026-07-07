@@ -5,7 +5,7 @@ if (year) {
 }
 
 function escapeHtml(value) {
-  return String(value)
+  return String(value || "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -13,10 +13,9 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-let blogPostsCache = [];
-let archiveFilter = "all";
-let archiveQuery = "";
-let archiveLimit = 60;
+function postHref(post) {
+  return post.page_path ? `./${post.page_path}` : post.url;
+}
 
 function renderLatestPosts(posts) {
   const grid = document.querySelector("#latest-post-grid");
@@ -24,120 +23,88 @@ function renderLatestPosts(posts) {
 
   grid.innerHTML = posts
     .slice(0, 6)
-    .map(
-      (post) => `
+    .map((post) => {
+      const image = post.thumbnail
+        ? `<img src="${escapeHtml(post.thumbnail)}" alt="${escapeHtml(post.title)}" loading="lazy" referrerpolicy="no-referrer" />`
+        : `<div class="blog-card-placeholder">7</div>`;
+      return `
         <article class="latest-post-card">
-          <div class="archive-meta">
-            <span>${escapeHtml(post.brand)}</span>
-            <time datetime="${escapeHtml(post.date_iso)}">${escapeHtml(post.date_text || post.date_iso)}</time>
-          </div>
-          <h3>${escapeHtml(post.title)}</h3>
-          <p>${escapeHtml(post.excerpt)}</p>
-          <a href="${escapeHtml(post.url)}" target="_blank" rel="noreferrer">원문 보기</a>
+          <a href="${escapeHtml(postHref(post))}">
+            <div class="latest-post-media">
+              ${image}
+              <span>${escapeHtml(post.category || post.tags?.[0] || "생활보수")}</span>
+            </div>
+            <div class="archive-meta">
+              <span>${escapeHtml(post.brand)}</span>
+              <time datetime="${escapeHtml(post.date_iso)}">${escapeHtml(post.date_text || post.date_iso)}</time>
+            </div>
+            <h3>${escapeHtml(post.title)}</h3>
+            <p>${escapeHtml(post.excerpt)}</p>
+          </a>
         </article>
-      `,
-    )
+      `;
+    })
     .join("");
 }
 
-function archiveCard(post) {
-  return `
-    <article class="archive-card" data-brand="${escapeHtml(post.brand)}" data-tags="${escapeHtml(post.tags.join(" "))}">
-      <div class="archive-meta">
-        <span>${escapeHtml(post.brand)}</span>
-        <time datetime="${escapeHtml(post.date_iso)}">${escapeHtml(post.date_text || post.date_iso)}</time>
-      </div>
-      <h2>${escapeHtml(post.title)}</h2>
-      <p>${escapeHtml(post.excerpt)}</p>
-      <div class="archive-tags">${post.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
-      <a href="${escapeHtml(post.url)}" target="_blank" rel="noreferrer">원문 보기</a>
-    </article>
-  `;
-}
-
-function filteredArchivePosts() {
-  const query = archiveQuery.trim().toLowerCase();
-  return blogPostsCache.filter((post) => {
-    const brandOk = archiveFilter === "all" || post.brand === archiveFilter;
-    if (!brandOk) return false;
-    if (!query) return true;
-    return `${post.title} ${post.brand} ${post.tags.join(" ")}`.toLowerCase().includes(query);
-  });
-}
-
-function renderArchivePosts() {
-  const grid = document.querySelector("#archive-grid");
-  const count = document.querySelector("#archive-count");
-  const more = document.querySelector("#archive-more");
+async function loadLatestPosts() {
+  const grid = document.querySelector("#latest-post-grid");
   if (!grid) return;
 
-  const filtered = filteredArchivePosts();
-  const visible = filtered.slice(0, archiveLimit);
-  grid.innerHTML = visible.map(archiveCard).join("");
-  if (count) {
-    count.textContent = `${filtered.length.toLocaleString("ko-KR")}건 중 ${visible.length.toLocaleString("ko-KR")}건 표시`;
-  }
-  if (more) {
-    more.hidden = visible.length >= filtered.length;
-  }
-}
-
-async function loadBlogPosts() {
-  const needsPosts = document.querySelector("#latest-post-grid");
-  const archiveGrid = document.querySelector("#archive-grid");
-  if (!needsPosts && !archiveGrid) return;
   try {
     const response = await fetch("./assets/blog-posts.json", { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const posts = await response.json();
-    blogPostsCache = posts;
     renderLatestPosts(posts);
-    renderArchivePosts();
   } catch {
-    if (needsPosts) {
-      needsPosts.innerHTML =
-        '<article class="post-skeleton">블로그 포스팅 목록을 불러오지 못했습니다. 전체 아카이브를 확인해주세요.</article>';
-    }
-    if (archiveGrid) {
-      archiveGrid.innerHTML = '<article class="post-skeleton">블로그 포스팅 목록을 불러오지 못했습니다.</article>';
-    }
+    grid.innerHTML = '<article class="post-skeleton">블로그 글 목록을 불러오지 못했습니다.</article>';
   }
 }
 
-function setupArchiveFilters() {
-  const buttons = Array.from(document.querySelectorAll(".archive-filters button"));
-  if (!buttons.length) return;
+function setupBlogFilters() {
+  const grid = document.querySelector("#blog-grid");
+  if (!grid) return;
+
+  const cards = Array.from(grid.querySelectorAll(".blog-card"));
+  const buttons = Array.from(document.querySelectorAll(".blog-filter"));
+  const search = document.querySelector("#blog-search");
+  const count = document.querySelector("#blog-count");
+  let filter = "all";
+
+  function applyFilters() {
+    const query = (search?.value || "").trim().toLowerCase();
+    let visible = 0;
+
+    cards.forEach((card) => {
+      const brand = card.dataset.brand || "";
+      const category = card.dataset.category || "";
+      const haystack = (card.dataset.search || card.textContent || "").toLowerCase();
+      const filterOk = filter === "all" || brand === filter || category === filter;
+      const queryOk = !query || haystack.includes(query);
+      const show = filterOk && queryOk;
+      card.hidden = !show;
+      if (show) visible += 1;
+    });
+
+    if (count) {
+      count.textContent = `${visible.toLocaleString("ko-KR")}건`;
+    }
+  }
 
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
-      archiveFilter = button.dataset.filter || "all";
-      archiveLimit = 60;
+      filter = button.dataset.filter || "all";
       buttons.forEach((item) => item.classList.toggle("active", item === button));
-      renderArchivePosts();
+      applyFilters();
     });
   });
+
+  if (search) {
+    search.addEventListener("input", applyFilters);
+  }
+
+  applyFilters();
 }
 
-function setupArchiveSearch() {
-  const input = document.querySelector("#archive-search");
-  if (!input) return;
-  input.addEventListener("input", () => {
-    archiveQuery = input.value;
-    archiveLimit = 60;
-    renderArchivePosts();
-  });
-}
-
-function setupArchiveMore() {
-  const button = document.querySelector("#archive-more");
-  if (!button) return;
-  button.addEventListener("click", () => {
-    archiveLimit += 60;
-    renderArchivePosts();
-  });
-}
-
-loadBlogPosts();
-setupArchiveFilters();
-setupArchiveSearch();
-setupArchiveMore();
+loadLatestPosts();
+setupBlogFilters();

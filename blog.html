@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>작업 사례 아카이브 | 세븐홈케어</title>
+    <meta name="description" content="세븐홈케어, 홍프로집박사, 기찬집수리 네이버 블로그 공개 작업 사례 모음." />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="세븐홈케어 홈">
+        <span class="brand-mark">7</span>
+        <span>
+          <strong>세븐홈케어</strong>
+          <small>작업 사례 아카이브</small>
+        </span>
+      </a>
+      <nav class="top-nav" aria-label="주요 메뉴">
+        <a href="./index.html#services">서비스</a>
+        <a href="./index.html#cases">대표 사례</a>
+        <a href="./blog.html">블로그 아카이브</a>
+        <a href="./index.html#contact">상담</a>
+      </nav>
+      <a class="header-call" href="tel:010-9435-9429">010-9435-9429</a>
+    </header>
+
+    <main>
+      <section class="archive-hero">
+        <div class="section-inner">
+          <p class="section-kicker">Work Archive</p>
+          <h1>고객 블로그 작업 사례를 한곳에 모았습니다.</h1>
+          <p>공개 네이버 블로그 목록을 기준으로 제목, 날짜, 핵심 요약, 원문 링크를 정리했습니다.</p>
+          <div class="archive-stats">
+            <span>총 1176건</span>
+            <span>홍프로집박사 472건 · 세븐홈케어 644건 · 기찬집수리 60건</span>
+            <span>갱신 2026-07-07 10:41 KST</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section archive-section" aria-labelledby="archive-title">
+        <div class="section-inner">
+          <div class="archive-toolbar">
+            <div>
+              <p class="section-kicker">Naver Posts</p>
+              <h2 id="archive-title">전체 공개 포스팅</h2>
+            </div>
+            <div class="archive-filters" aria-label="브랜드 필터">
+              <button type="button" data-filter="all" class="active">전체</button>
+              <button type="button" data-filter="세븐홈케어">세븐홈케어</button>
+              <button type="button" data-filter="홍프로집박사">홍프로집박사</button>
+              <button type="button" data-filter="기찬집수리">기찬집수리</button>
+            </div>
+          </div>
+          <div class="archive-search-row">
+            <label for="archive-search">제목 또는 작업 유형 검색</label>
+            <input id="archive-search" type="search" placeholder="예: 유리타공, 중문, 붙박이장, 샤워부스" autocomplete="off" />
+            <span id="archive-count">1,176건</span>
+          </div>
+          <div class="archive-grid" id="archive-grid">
+            <article class="post-skeleton">블로그 포스팅을 불러오는 중입니다.</article>
+          </div>
+          <div class="archive-more-row">
+            <button id="archive-more" type="button">더 보기</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>세븐홈케어 · 홍프로집박사</p>
+      <p><a href="./index.html">홈으로</a></p>
+    </footer>
+    <script src="./script.js"></script>
+  </body>
+</html>

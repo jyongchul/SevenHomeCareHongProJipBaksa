@@ -522,12 +522,26 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
       <section class="blog-hero">
         <div class="section-inner">
           <p class="section-kicker">Blog</p>
-          <h1>현장에서 기록한 실제 작업 블로그</h1>
-          <p>네이버 블로그에 올렸던 포스팅을 홈페이지 안에서도 읽을 수 있게 정리했습니다.</p>
+          <h1>블로그</h1>
+          <p>네이버 블로그에 올렸던 실제 포스팅을 홈페이지 안에서도 제목, 본문, 사진 흐름 그대로 읽을 수 있게 정리했습니다.</p>
           <div class="archive-stats">
             <span>총 {len(posts):,}건</span>
             <span>{html.escape(stats)}</span>
             <span>갱신 {generated_at} KST</span>
+          </div>
+          <div class="blog-source-panel" aria-label="브랜드별 블로그 바로가기">
+            <a href="https://m.blog.naver.com/cadzone77" target="_blank" rel="noreferrer">
+              <strong>세븐홈케어</strong>
+              <span>cadzone77 · {counts.get("세븐홈케어", 0):,}건</span>
+            </a>
+            <a href="https://m.blog.naver.com/tori_0815" target="_blank" rel="noreferrer">
+              <strong>홍프로집박사</strong>
+              <span>tori_0815 · {counts.get("홍프로집박사", 0):,}건</span>
+            </a>
+            <a href="https://m.blog.naver.com/wooju11m" target="_blank" rel="noreferrer">
+              <strong>기찬집수리</strong>
+              <span>wooju11m · {counts.get("기찬집수리", 0):,}건</span>
+            </a>
           </div>
         </div>
       </section>

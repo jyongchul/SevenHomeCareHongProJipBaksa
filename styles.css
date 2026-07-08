@@ -356,7 +356,45 @@ a {
 }
 
 .cases-band {
-  background: #f8faf9;
+  border-block: 1px solid rgba(32, 57, 75, 0.08);
+  background: linear-gradient(180deg, #f8faf7 0%, #ffffff 100%);
+}
+
+.cases-heading {
+  align-items: end;
+}
+
+.case-section-lead {
+  max-width: 560px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.case-status-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: -8px 0 22px;
+}
+
+.case-status-strip span {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding: 14px 16px;
+  border: 1px solid rgba(32, 57, 75, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.case-status-strip strong {
+  margin-right: 7px;
+  color: var(--deep);
+  font-size: 1.1rem;
+  font-weight: 900;
 }
 
 .case-grid {
@@ -390,6 +428,7 @@ a {
   grid-column: span 2;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+  min-height: 360px;
 }
 
 .feature-case img {
@@ -397,25 +436,64 @@ a {
 }
 
 .case-body {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
   padding: 22px;
 }
 
+.case-topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
 .case-brand {
-  margin: 0 0 10px;
+  margin: 0;
   color: var(--green);
   font-size: 0.82rem;
   font-weight: 850;
+  white-space: nowrap;
 }
 
 .case-status {
   display: inline-flex;
-  margin-bottom: 12px;
-  padding: 5px 8px;
+  max-width: 100%;
+  padding: 5px 9px;
   border-radius: 999px;
   color: var(--deep);
   background: var(--mist);
   font-size: 0.78rem;
   font-weight: 850;
+  line-height: 1.25;
+  text-align: right;
+}
+
+.case-detail-list {
+  display: grid;
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 18px;
+}
+
+.case-detail-list span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 760;
+}
+
+.case-detail-list span::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--green);
+  content: "";
+  flex: 0 0 auto;
 }
 
 .process-list {
@@ -1144,6 +1222,11 @@ a {
 
   .feature-case {
     grid-column: span 2;
+    min-height: 0;
+  }
+
+  .case-status-strip {
+    grid-template-columns: 1fr;
   }
 
   .two-col,
@@ -1303,6 +1386,23 @@ a {
   .feature-case {
     grid-column: auto;
     display: block;
+  }
+
+  .case-section-lead {
+    margin-top: 14px;
+  }
+
+  .case-status-strip {
+    margin-top: 0;
+  }
+
+  .case-topline {
+    display: block;
+  }
+
+  .case-status {
+    margin-top: 9px;
+    text-align: left;
   }
 
   .service-card,

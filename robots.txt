@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+User-agent: Yeti
+Allow: /
+
+Sitemap: https://jyongchul.github.io/SevenHomeCareHongProJipBaksa/sitemap.xml

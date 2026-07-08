@@ -69,7 +69,18 @@ function setupBlogFilters() {
   const buttons = Array.from(document.querySelectorAll(".blog-filter"));
   const search = document.querySelector("#blog-search");
   const count = document.querySelector("#blog-count");
-  let filter = "all";
+  const params = new URLSearchParams(window.location.search);
+  const initialFilter = params.get("filter") || "all";
+  const knownFilters = new Set(buttons.map((button) => button.dataset.filter || "all"));
+  let filter = knownFilters.has(initialFilter) ? initialFilter : "all";
+
+  if (search && params.get("q")) {
+    search.value = params.get("q");
+  }
+
+  buttons.forEach((button) => {
+    button.classList.toggle("active", (button.dataset.filter || "all") === filter);
+  });
 
   function applyFilters() {
     const query = (search?.value || "").trim().toLowerCase();
@@ -95,6 +106,13 @@ function setupBlogFilters() {
     button.addEventListener("click", () => {
       filter = button.dataset.filter || "all";
       buttons.forEach((item) => item.classList.toggle("active", item === button));
+      const url = new URL(window.location.href);
+      if (filter === "all") {
+        url.searchParams.delete("filter");
+      } else {
+        url.searchParams.set("filter", filter);
+      }
+      window.history.replaceState({}, "", url);
       applyFilters();
     });
   });

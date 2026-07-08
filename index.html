@@ -328,30 +328,86 @@
         </div>
       </section>
 
-      <section class="section" id="process" aria-labelledby="process-title">
-        <div class="section-inner process-layout">
-          <div class="section-heading">
-            <p class="section-kicker">Process</p>
-            <h2 id="process-title">상담부터 기록까지</h2>
+      <section class="section process-showcase-section" id="process" aria-labelledby="process-title">
+        <div class="section-inner">
+          <div class="section-heading process-showcase-heading">
+            <div>
+              <p class="section-kicker">Process</p>
+              <h2 id="process-title">상담부터 기록까지</h2>
+            </div>
+            <p class="process-lead">
+              실제 현장 사진과 짧은 작업 영상을 기준으로 상담, 판단, 작업, 기록 흐름을 확인할 수 있습니다.
+            </p>
           </div>
-          <ol class="process-list">
-            <li>
-              <strong>사진 확인</strong>
-              <span>증상, 위치, 치수, 주변 마감재를 먼저 확인합니다.</span>
-            </li>
-            <li>
-              <strong>작업 가능성 판단</strong>
-              <span>방문 전 필요한 부속과 위험 요소를 정리합니다.</span>
-            </li>
-            <li>
-              <strong>현장 작업</strong>
-              <span>보호, 분리, 수리, 마감 확인 순서로 진행합니다.</span>
-            </li>
-            <li>
-              <strong>사례 기록</strong>
-              <span>작업 내용과 사진을 블로그와 홈페이지 사례로 정리합니다.</span>
-            </li>
-          </ol>
+          <div class="process-showcase">
+            <div class="process-media-stack" aria-live="polite">
+              <figure class="process-media-card active" id="process-media-1">
+                <img src="./assets/process/step-01-photo-check.jpg" alt="찢어진 벽지 상태를 가까이 확인한 사진" />
+                <figcaption>
+                  <strong>01 사진 확인</strong>
+                  <span>전체 위치와 손상 부위를 먼저 나눠 봅니다.</span>
+                </figcaption>
+              </figure>
+              <figure class="process-media-card" id="process-media-2" hidden>
+                <img src="./assets/process/step-02-diagnosis.jpg" alt="3연동 중문 부속 상태를 확인하는 현장 사진" />
+                <figcaption>
+                  <strong>02 가능성 판단</strong>
+                  <span>부속, 치수, 주변 마감재를 확인해 작업 범위를 좁힙니다.</span>
+                </figcaption>
+              </figure>
+              <figure class="process-media-card" id="process-media-3" hidden>
+                <video
+                  src="./assets/process/step-03-field-work.mp4"
+                  poster="./assets/process/step-03-field-work-poster.jpg"
+                  muted
+                  loop
+                  playsinline
+                  preload="metadata"
+                ></video>
+                <figcaption>
+                  <strong>03 현장 작업</strong>
+                  <span>보호, 분리, 수리, 마감 확인 순서로 진행합니다.</span>
+                </figcaption>
+              </figure>
+              <figure class="process-media-card" id="process-media-4" hidden>
+                <img src="./assets/process/step-04-case-record.jpg" alt="붙박이장 슬라이딩 도어 롤러 교체 후 확인 사진" />
+                <figcaption>
+                  <strong>04 사례 기록</strong>
+                  <span>완료 사진과 작업 내용을 블로그와 홈페이지 사례로 정리합니다.</span>
+                </figcaption>
+              </figure>
+            </div>
+            <ol class="process-list process-interactive-list">
+              <li>
+                <button class="process-step-button active" type="button" data-process-step="1" aria-pressed="true" aria-controls="process-media-1">
+                  <span>01</span>
+                  <strong>사진 확인</strong>
+                  <small>증상, 위치, 치수, 주변 마감재를 먼저 확인합니다.</small>
+                </button>
+              </li>
+              <li>
+                <button class="process-step-button" type="button" data-process-step="2" aria-pressed="false" aria-controls="process-media-2">
+                  <span>02</span>
+                  <strong>작업 가능성 판단</strong>
+                  <small>방문 전 필요한 부속과 위험 요소를 정리합니다.</small>
+                </button>
+              </li>
+              <li>
+                <button class="process-step-button" type="button" data-process-step="3" aria-pressed="false" aria-controls="process-media-3">
+                  <span>03</span>
+                  <strong>현장 작업</strong>
+                  <small>보호, 분리, 수리, 마감 확인 순서로 진행합니다.</small>
+                </button>
+              </li>
+              <li>
+                <button class="process-step-button" type="button" data-process-step="4" aria-pressed="false" aria-controls="process-media-4">
+                  <span>04</span>
+                  <strong>사례 기록</strong>
+                  <small>작업 내용과 사진을 블로그와 홈페이지 사례로 정리합니다.</small>
+                </button>
+              </li>
+            </ol>
+          </div>
         </div>
       </section>
 

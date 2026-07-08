@@ -124,5 +124,37 @@ function setupBlogFilters() {
   applyFilters();
 }
 
+function setupProcessShowcase() {
+  const buttons = Array.from(document.querySelectorAll(".process-step-button"));
+  const cards = Array.from(document.querySelectorAll(".process-media-card"));
+  if (!buttons.length || !cards.length) return;
+
+  function setActive(step) {
+    buttons.forEach((button) => {
+      const active = button.dataset.processStep === step;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+
+    cards.forEach((card) => {
+      const active = card.id === `process-media-${step}`;
+      card.hidden = !active;
+      card.classList.toggle("active", active);
+      const video = card.querySelector("video");
+      if (!video) return;
+      if (active) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+    });
+  }
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => setActive(button.dataset.processStep || "1"));
+  });
+}
+
 loadLatestPosts();
 setupBlogFilters();
+setupProcessShowcase();

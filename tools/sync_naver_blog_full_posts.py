@@ -25,7 +25,7 @@ BLOG_PAGES = SITE / "blog-pages"
 SITEMAP = SITE / "sitemap.xml"
 ROBOTS = SITE / "robots.txt"
 LLMS = SITE / "llms.txt"
-BASE_URL = "https://jyongchul.github.io/SevenHomeCareHongProJipBaksa/"
+BASE_URL = "https://sevenhomecare.co.kr/"
 SITE_NAME = "세븐홈케어 · 홍프로집박사"
 SITE_DESCRIPTION = (
     "서울, 경기, 인천 생활 보수 전문 세븐홈케어와 홍프로집박사의 유리 타공, "

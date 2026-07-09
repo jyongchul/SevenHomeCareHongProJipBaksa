@@ -36,6 +36,22 @@
   "image": "https://sevenhomecare.co.kr/assets/generated-repair-hero.jpg",
   "telephone": "010-9435-9429",
   "priceRange": "상담 후 견적",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "010-9435-9429",
+    "contactType": "customer service",
+    "areaServed": "KR",
+    "availableLanguage": "ko"
+  },
+  "serviceArea": {
+    "@type": "GeoCircle",
+    "geoMidpoint": {
+      "@type": "GeoCoordinates",
+      "addressCountry": "KR",
+      "addressRegion": "Seoul"
+    },
+    "geoRadius": "80000"
+  },
   "areaServed": [
     { "@type": "Place", "name": "서울" },
     { "@type": "Place", "name": "경기" },
@@ -61,6 +77,39 @@
     "https://blog.naver.com/cadzone77",
     "https://blog.naver.com/tori_0815",
     "https://blog.naver.com/wooju11m"
+  ]
+}
+    </script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://sevenhomecare.co.kr/#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "사진만으로 견적이 가능한가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "대략적인 작업 범위는 확인할 수 있지만, 타공과 도어 부속은 현장 조건에 따라 달라질 수 있습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "상가 유리 타공도 가능한가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "유리 두께, 필름, 위치, 주변 프레임을 확인한 뒤 가능 여부와 보호 방식을 안내합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "블로그 사례와 같은 작업을 요청할 수 있나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "가능합니다. 비슷한 사례 URL이나 사진을 함께 보내주시면 확인이 빠릅니다."
+      }
+    }
   ]
 }
     </script>
@@ -103,7 +152,10 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-inner">
           <p class="eyebrow">서울 · 경기 · 인천 생활 보수 포트폴리오</p>
-          <h1 id="hero-title">세븐홈케어 · 홍프로집박사</h1>
+          <h1 id="hero-title">
+            <span>세븐홈케어</span>
+            <span>홍프로집박사</span>
+          </h1>
           <p class="hero-lead">
             네이버 블로그에 쌓인 실제 시공 기록 1,176건을 홈페이지로 정리했습니다.
             유리 타공, 중문 레일, 붙박이장 롤러, 벽지 보수까지 사진과 작업 흐름을 보고 문의할 수 있습니다.
@@ -149,8 +201,10 @@
       <section class="section" id="services" aria-labelledby="services-title">
         <div class="section-inner">
           <div class="section-heading">
-            <p class="section-kicker">Services</p>
-            <h2 id="services-title">주요 작업 범위</h2>
+            <div>
+              <p class="section-kicker">Services</p>
+              <h2 id="services-title">주요 작업 범위</h2>
+            </div>
           </div>
           <div class="service-grid">
             <article class="service-card">
@@ -251,7 +305,7 @@
           <div class="case-grid">
             <article class="case-card feature-case">
               <div class="case-media">
-                <img src="./assets/cases/songpa-drilling.jpg" alt="송파 상가 유리 타공 작업 현장" loading="lazy" />
+                <img src="./assets/cases/songpa-drilling.jpg" alt="송파 상가 유리 타공 작업 현장" loading="eager" fetchpriority="high" />
                 <span>유리 타공</span>
               </div>
               <div class="case-body">
@@ -269,7 +323,7 @@
             </article>
             <article class="case-card">
               <div class="case-media">
-                <img src="./assets/cases/suwon-wallpaper.jpg" alt="수원 벽지 보수 작업" loading="lazy" />
+                <img src="./assets/cases/suwon-wallpaper.jpg" alt="수원 벽지 보수 작업" loading="eager" />
                 <span>벽지 보수</span>
               </div>
               <div class="case-body">
@@ -287,7 +341,7 @@
             </article>
             <article class="case-card">
               <div class="case-media">
-                <img src="./assets/cases/yongsan-door.jpg" alt="용산 3연동 중문 레일 부속" loading="lazy" />
+                <img src="./assets/cases/yongsan-door.jpg" alt="용산 3연동 중문 레일 부속" loading="eager" />
                 <span>중문 수리</span>
               </div>
               <div class="case-body">
@@ -305,7 +359,7 @@
             </article>
             <article class="case-card">
               <div class="case-media">
-                <img src="./assets/cases/songdo-glass.jpg" alt="송도 상가 유리 타공 결과" loading="lazy" />
+                <img src="./assets/cases/songdo-glass.jpg" alt="송도 상가 유리 타공 결과" loading="eager" />
                 <span>상가 유리</span>
               </div>
               <div class="case-body">
@@ -323,7 +377,7 @@
             </article>
             <article class="case-card">
               <div class="case-media">
-                <img src="./assets/cases/seongnam-roller.jpg" alt="성남 붙박이장 슬라이딩 도어" loading="lazy" />
+                <img src="./assets/cases/seongnam-roller.jpg" alt="성남 붙박이장 슬라이딩 도어" loading="eager" />
                 <span>롤러 교체</span>
               </div>
               <div class="case-body">
@@ -430,9 +484,9 @@
         <div class="section-inner blog-layout">
           <div>
             <p class="section-kicker">Naver Blog</p>
-            <h2 id="blog-title">네이버 블로그 글을 홈페이지 자산으로 누적합니다.</h2>
+            <h2 id="blog-title">네이버 블로그의 실제 시공 사례를 한곳에 모았습니다.</h2>
             <p class="section-copy">
-              네이버 블로그에 올렸던 포스팅을 홈페이지 내부 페이지로 가져와 제목,
+              네이버 블로그에 올렸던 포스팅을 사례 상세 페이지로 가져와 제목,
               본문, 사진 흐름을 그대로 확인할 수 있게 정리했습니다. 현재 공개 포스팅
               1,176건을 브랜드와 작업 유형별로 탐색할 수 있습니다.
             </p>
@@ -447,7 +501,7 @@
             <div>
               <strong>02</strong>
               <span>홈페이지 검색</span>
-              <p>브랜드, 작업 유형, 제목, 지역 키워드로 내부 사례를 찾을 수 있습니다.</p>
+              <p>브랜드, 작업 유형, 제목, 지역 키워드로 비슷한 작업 사례를 찾을 수 있습니다.</p>
             </div>
             <div>
               <strong>03</strong>
@@ -476,8 +530,10 @@
       <section class="section faq-section" aria-labelledby="faq-title">
         <div class="section-inner">
           <div class="section-heading">
-            <p class="section-kicker">FAQ</p>
-            <h2 id="faq-title">문의 전 확인 사항</h2>
+            <div>
+              <p class="section-kicker">FAQ</p>
+              <h2 id="faq-title">문의 전 확인 사항</h2>
+            </div>
           </div>
           <div class="faq-grid">
             <article>

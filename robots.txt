@@ -4,4 +4,4 @@ Allow: /
 User-agent: Yeti
 Allow: /
 
-Sitemap: https://sevenhomecare.co.kr/sitemap.xml
+Sitemap: http://sevenhomecare.co.kr/sitemap.xml

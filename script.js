@@ -25,7 +25,7 @@ function renderLatestPosts(posts) {
     .slice(0, 6)
     .map((post) => {
       const image = post.thumbnail
-        ? `<img src="${escapeHtml(post.thumbnail)}" alt="${escapeHtml(post.title)}" loading="lazy" referrerpolicy="no-referrer" />`
+        ? `<img src="${escapeHtml(post.thumbnail)}" alt="${escapeHtml(post.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="var p=this.closest('.latest-post-media,.blog-card-media');if(p)p.classList.add('image-unavailable');this.remove()" />`
         : `<div class="blog-card-placeholder">7</div>`;
       return `
         <article class="latest-post-card">
@@ -102,6 +102,24 @@ function setupBlogFilters() {
     }
   }
 
+  let searchUrlTimer = 0;
+
+  function updateSearchUrl() {
+    const url = new URL(window.location.href);
+    const query = (search?.value || "").trim();
+    if (query) {
+      url.searchParams.set("q", query);
+    } else {
+      url.searchParams.delete("q");
+    }
+    if (filter === "all") {
+      url.searchParams.delete("filter");
+    } else {
+      url.searchParams.set("filter", filter);
+    }
+    window.history.replaceState({}, "", url);
+  }
+
   buttons.forEach((button) => {
     button.addEventListener("click", () => {
       filter = button.dataset.filter || "all";
@@ -118,41 +136,37 @@ function setupBlogFilters() {
   });
 
   if (search) {
-    search.addEventListener("input", applyFilters);
+    search.addEventListener("input", () => {
+      applyFilters();
+      window.clearTimeout(searchUrlTimer);
+      searchUrlTimer = window.setTimeout(updateSearchUrl, 220);
+    });
   }
 
   applyFilters();
 }
 
 function setupProcessShowcase() {
-  const buttons = Array.from(document.querySelectorAll(".process-step-button"));
+  const controls = Array.from(document.querySelectorAll(".process-control"));
   const cards = Array.from(document.querySelectorAll(".process-media-card"));
-  if (!buttons.length || !cards.length) return;
+  if (!controls.length || !cards.length) return;
 
-  function setActive(step) {
-    buttons.forEach((button) => {
-      const active = button.dataset.processStep === step;
-      button.classList.toggle("active", active);
-      button.setAttribute("aria-pressed", active ? "true" : "false");
-    });
+  function syncActiveMedia() {
+    const activeControl = controls.find((control) => control.checked);
+    const step = activeControl?.id?.replace("process-step-", "") || "1";
 
     cards.forEach((card) => {
       const active = card.id === `process-media-${step}`;
-      card.hidden = !active;
-      card.classList.toggle("active", active);
+      card.setAttribute("aria-hidden", active ? "false" : "true");
       const video = card.querySelector("video");
-      if (!video) return;
-      if (active) {
-        video.play().catch(() => {});
-      } else {
+      if (video && !active) {
         video.pause();
       }
     });
   }
 
-  buttons.forEach((button) => {
-    button.addEventListener("click", () => setActive(button.dataset.processStep || "1"));
-  });
+  controls.forEach((control) => control.addEventListener("change", syncActiveMedia));
+  syncActiveMedia();
 }
 
 loadLatestPosts();

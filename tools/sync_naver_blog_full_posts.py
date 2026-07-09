@@ -25,7 +25,7 @@ BLOG_PAGES = SITE / "blog-pages"
 SITEMAP = SITE / "sitemap.xml"
 ROBOTS = SITE / "robots.txt"
 LLMS = SITE / "llms.txt"
-BASE_URL = "https://sevenhomecare.co.kr/"
+BASE_URL = "http://sevenhomecare.co.kr/"
 SITE_NAME = "세븐홈케어 · 홍프로집박사"
 SITE_DESCRIPTION = (
     "서울, 경기, 인천 생활 보수 전문 세븐홈케어와 홍프로집박사의 유리 타공, "
@@ -33,6 +33,19 @@ SITE_DESCRIPTION = (
 )
 DEFAULT_IMAGE = "assets/generated-repair-hero.jpg"
 PHONE = "010-9435-9429"
+PHONE_REPLACEMENTS = {
+    "010-5943-3925",
+    "010-3967-9720",
+    "010-4868-2166",
+    "010-5943-3905",
+    "010-5942-3925",
+    "010-9734-9429",
+    "010-5943-4925",
+    "010-9435-9428",
+}
+TEXT_REPLACEMENTS = {
+    "홈페이지나 블로그 포트폴리오": "웹사이트와 블로그의 실제 시공 사례",
+}
 SERVICE_AREAS = ("서울", "경기", "인천", "성남", "분당", "수원", "부천", "남양주", "하남")
 SERVICE_TYPES = ("유리 타공", "에어컨 배관 타공", "중문 수리", "슬라이딩 도어 수리", "붙박이장 롤러 교체", "벽지 보수", "욕실 보수", "생활 보수")
 
@@ -103,6 +116,23 @@ def clean_plain_text(value: str) -> str:
     value = re.sub(r"[ \t\r\f\v]+", " ", value)
     value = re.sub(r"\n{3,}", "\n\n", value)
     return value.strip()
+
+
+def normalize_public_text(value: str) -> str:
+    value = clean_plain_text(value)
+    for phone in PHONE_REPLACEMENTS:
+        value = value.replace(phone, PHONE)
+    for before, after in TEXT_REPLACEMENTS.items():
+        value = value.replace(before, after)
+    return value
+
+
+def normalize_public_link(value: str) -> str:
+    value = html.unescape(value or "").strip()
+    if any(phone in value for phone in PHONE_REPLACEMENTS | {PHONE}):
+        if value.startswith(("tel:", "http://010-", "https://010-")):
+            return f"tel:{PHONE}"
+    return value
 
 
 def strip_tags(value: str) -> str:
@@ -265,7 +295,7 @@ def first_text_excerpt(elements: list[dict[str, str]], fallback: str) -> str:
     for element in elements:
         if element.get("type") != "text":
             continue
-        text = clean_plain_text(element.get("content", ""))
+        text = normalize_public_text(element.get("content", ""))
         text = re.sub(r"\s+", " ", text)
         if len(text) >= 24:
             return text[:180] + ("..." if len(text) > 180 else "")
@@ -282,7 +312,7 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
     title = meta.title
     title_el = soup.select_one(".se-title-text, .se_title, .pcol1")
     if title_el:
-        candidate = clean_plain_text(title_el.get_text(" ", strip=True))
+        candidate = normalize_public_text(title_el.get_text(" ", strip=True))
         if candidate and candidate not in {"블로그"}:
             title = candidate
 
@@ -293,10 +323,10 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
     for module in soup.find_all("div", class_=lambda value: value and "se-module" in value):
         classes = module.get("class", [])
         if "se-module-text" in classes:
-            text = clean_plain_text(module.get_text("\n", strip=True))
+            text = normalize_public_text(module.get_text("\n", strip=True))
             if not text or any(pattern in text for pattern in SKIP_TEXT_PATTERNS):
                 continue
-            if not title_seen and clean_plain_text(text) == clean_plain_text(title):
+            if not title_seen and normalize_public_text(text) == normalize_public_text(title):
                 title_seen = True
                 continue
             elements.append({"type": "text", "content": text})
@@ -310,7 +340,7 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
             if not src or src in seen_images:
                 continue
             seen_images.add(src)
-            alt = clean_plain_text(image.get("alt") or title)
+            alt = normalize_public_text(image.get("alt") or title)
             link = ""
             parent = image.find_parent("a")
             if parent:
@@ -338,7 +368,7 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
         "blog_id": meta.blog_id,
         "brand": meta.brand,
         "label": meta.label,
-        "title": title,
+        "title": normalize_public_text(title),
         "url": meta.url,
         "mobile_url": url,
         "date_text": meta.date_text,
@@ -395,6 +425,33 @@ def local_business_schema() -> dict[str, Any]:
         "image": image_url(),
         "telephone": PHONE,
         "priceRange": "상담 후 견적",
+        "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "생활 보수 서비스",
+            "itemListElement": [
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": service_name,
+                        "areaServed": ["서울", "경기", "인천"],
+                    },
+                }
+                for service_name in ("유리 타공", "중문 수리", "벽지 보수", "붙박이장 롤러 교체", "욕실 보수")
+            ],
+        },
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": PHONE,
+            "contactType": "customer service",
+            "areaServed": "KR",
+            "availableLanguage": "ko",
+        },
+        "potentialAction": {
+            "@type": "ContactAction",
+            "target": f"tel:{PHONE}",
+            "name": "전화 상담",
+        },
         "areaServed": [{"@type": "Place", "name": area} for area in SERVICE_AREAS],
         "serviceType": list(SERVICE_TYPES),
         "knowsAbout": list(SERVICE_TYPES),
@@ -466,7 +523,7 @@ def blog_collection_schema(posts: list[dict[str, Any]]) -> dict[str, Any]:
         "@id": public_url("blog.html#collection"),
         "name": "세븐홈케어 블로그",
         "url": public_url("blog.html"),
-        "description": "네이버 블로그에 공개된 실제 작업 포스팅을 홈페이지 안에서 읽을 수 있도록 정리한 블로그 모음입니다.",
+        "description": "네이버 블로그에 공개된 실제 작업 포스팅을 웹사이트에서 읽을 수 있도록 정리한 블로그 모음입니다.",
         "inLanguage": "ko-KR",
         "isPartOf": {"@id": public_url("#website")},
         "mainEntity": {
@@ -515,21 +572,23 @@ def render_elements(elements: list[dict[str, str]], original_url: str) -> str:
     parts: list[str] = []
     for element in elements:
         if element.get("type") == "text":
-            lines = [html.escape(line.strip()) for line in element.get("content", "").split("\n") if line.strip()]
+            lines = [html.escape(normalize_public_text(line)) for line in element.get("content", "").split("\n") if line.strip()]
             if not lines:
                 continue
             text = "<br />\n".join(lines)
             if len(lines) == 1 and len(lines[0]) < 48 and not lines[0].endswith((".", "요", "다")):
-                parts.append(f"<h2>{text}</h2>")
+                parts.append(f'<p class="post-subhead">{text}</p>')
             else:
                 parts.append(f"<p>{text}</p>")
             continue
         if element.get("type") == "image":
             img = (
                 f'<img class="post-image" src="{escape_attr(element.get("src", ""))}" '
-                f'alt="{escape_attr(element.get("alt", "작업 이미지"))}" loading="lazy" referrerpolicy="no-referrer" />'
+                f'alt="{escape_attr(normalize_public_text(element.get("alt", "작업 이미지")))}" '
+                'loading="lazy" referrerpolicy="no-referrer" '
+                'onerror="var p=this.closest(\'figure,.blog-card-media\');if(p)p.classList.add(\'image-unavailable\');this.remove()" />'
             )
-            link = element.get("link") or ""
+            link = normalize_public_link(element.get("link") or "")
             if link:
                 img = f'<a class="post-image-link" href="{escape_attr(link)}" target="_blank" rel="noreferrer">{img}</a>'
             parts.append(f"<figure>{img}</figure>")
@@ -664,7 +723,7 @@ def render_blog_card(post: dict[str, Any]) -> str:
                     <span>{html.escape(post["brand"])}</span>
                     <time datetime="{escape_attr(post["date_iso"])}">{html.escape(post["date_text"] or post["date_iso"])}</time>
                   </div>
-                  <h2>{html.escape(post["title"])}</h2>
+                  <h3>{html.escape(post["title"])}</h3>
                   <p>{html.escape(post["excerpt"])}</p>
                 </div>
               </a>
@@ -678,7 +737,7 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
         counts[post["brand"]] = counts.get(post["brand"], 0) + 1
     stats = " · ".join(f"{brand} {count:,}건" for brand, count in counts.items())
     cards = "\n".join(render_blog_card(post) for post in posts)
-    description = "세븐홈케어, 홍프로집박사, 기찬집수리의 실제 네이버 블로그 포스팅 1,176건을 홈페이지 안에서 확인할 수 있습니다."
+    description = "세븐홈케어, 홍프로집박사, 기찬집수리의 실제 네이버 블로그 포스팅 1,176건을 웹사이트에서 확인할 수 있습니다."
     return f"""<!doctype html>
 <html lang="ko">
   <head>
@@ -700,7 +759,7 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
         <div class="section-inner">
           <p class="section-kicker">Blog</p>
           <h1>블로그</h1>
-          <p>네이버 블로그에 올렸던 실제 포스팅을 홈페이지 안에서도 제목, 본문, 사진 흐름 그대로 읽을 수 있게 정리했습니다.</p>
+          <p>네이버 블로그에 올렸던 실제 포스팅을 웹사이트에서도 제목, 본문, 사진 흐름 그대로 읽을 수 있게 정리했습니다.</p>
           <div class="archive-stats">
             <span>총 {len(posts):,}건</span>
             <span>{html.escape(stats)}</span>

@@ -796,6 +796,9 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
               <button type="button" class="blog-filter" data-filter="기찬집수리">기찬집수리</button>
               <button type="button" class="blog-filter" data-filter="유리타공">유리타공</button>
               <button type="button" class="blog-filter" data-filter="중문수리">중문수리</button>
+              <button type="button" class="blog-filter" data-filter="벽지보수">벽지보수</button>
+              <button type="button" class="blog-filter" data-filter="생활보수">생활보수</button>
+              <button type="button" class="blog-filter" data-filter="붙박이장">붙박이장</button>
               <button type="button" class="blog-filter" data-filter="욕실보수">욕실보수</button>
             </div>
           </div>
@@ -806,6 +809,10 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
           </div>
           <div class="blog-grid" id="blog-grid">
 {cards}
+          </div>
+          <div class="blog-load-more" id="blog-load-more" hidden>
+            <button type="button" id="blog-load-more-button" aria-controls="blog-grid">사례 더 보기</button>
+            <span id="blog-progress" aria-live="polite">24 / {len(posts):,}건 표시</span>
           </div>
         </div>
       </section>

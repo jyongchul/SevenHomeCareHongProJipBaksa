@@ -1365,8 +1365,6 @@ a {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
-  content-visibility: auto;
-  contain-intrinsic-size: 360px 430px;
   transition:
     border-color 180ms ease,
     background 180ms ease;
@@ -1415,6 +1413,42 @@ a {
 .blog-card[hidden],
 .archive-card[hidden] {
   display: none;
+}
+
+.blog-load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.blog-load-more[hidden],
+.blog-load-more button[hidden] {
+  display: none;
+}
+
+.blog-load-more button {
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid var(--navy);
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--navy);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.blog-load-more button:hover,
+.blog-load-more button:focus-visible {
+  background: var(--blue);
+}
+
+.blog-load-more span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
 }
 
 .archive-meta {

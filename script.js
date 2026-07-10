@@ -65,14 +65,19 @@ function setupBlogFilters() {
   const grid = document.querySelector("#blog-grid");
   if (!grid) return;
 
+  const pageSize = 24;
   const cards = Array.from(grid.querySelectorAll(".blog-card"));
   const buttons = Array.from(document.querySelectorAll(".blog-filter"));
   const search = document.querySelector("#blog-search");
   const count = document.querySelector("#blog-count");
+  const loadMorePanel = document.querySelector("#blog-load-more");
+  const loadMoreButton = document.querySelector("#blog-load-more-button");
+  const progress = document.querySelector("#blog-progress");
   const params = new URLSearchParams(window.location.search);
   const initialFilter = params.get("filter") || "all";
   const knownFilters = new Set(buttons.map((button) => button.dataset.filter || "all"));
   let filter = knownFilters.has(initialFilter) ? initialFilter : "all";
+  let visibleLimit = pageSize;
 
   if (search && params.get("q")) {
     search.value = params.get("q");
@@ -82,9 +87,12 @@ function setupBlogFilters() {
     button.classList.toggle("active", (button.dataset.filter || "all") === filter);
   });
 
-  function applyFilters() {
+  function applyFilters({ resetLimit = false } = {}) {
+    if (resetLimit) visibleLimit = pageSize;
+
     const query = (search?.value || "").trim().toLowerCase();
-    let visible = 0;
+    let matched = 0;
+    let shown = 0;
 
     cards.forEach((card) => {
       const brand = card.dataset.brand || "";
@@ -92,13 +100,28 @@ function setupBlogFilters() {
       const haystack = (card.dataset.search || card.textContent || "").toLowerCase();
       const filterOk = filter === "all" || brand === filter || category === filter;
       const queryOk = !query || haystack.includes(query);
-      const show = filterOk && queryOk;
+      const matches = filterOk && queryOk;
+      const show = matches && matched < visibleLimit;
+
+      if (matches) matched += 1;
       card.hidden = !show;
-      if (show) visible += 1;
+      if (show) shown += 1;
     });
 
     if (count) {
-      count.textContent = `${visible.toLocaleString("ko-KR")}건`;
+      count.textContent = `${matched.toLocaleString("ko-KR")}건`;
+    }
+
+    if (loadMorePanel) {
+      loadMorePanel.hidden = matched === 0;
+    }
+
+    if (loadMoreButton) {
+      loadMoreButton.hidden = shown >= matched;
+    }
+
+    if (progress) {
+      progress.textContent = `${shown.toLocaleString("ko-KR")} / ${matched.toLocaleString("ko-KR")}건 표시`;
     }
   }
 
@@ -131,15 +154,22 @@ function setupBlogFilters() {
         url.searchParams.set("filter", filter);
       }
       window.history.replaceState({}, "", url);
-      applyFilters();
+      applyFilters({ resetLimit: true });
     });
   });
 
   if (search) {
     search.addEventListener("input", () => {
-      applyFilters();
+      applyFilters({ resetLimit: true });
       window.clearTimeout(searchUrlTimer);
       searchUrlTimer = window.setTimeout(updateSearchUrl, 220);
+    });
+  }
+
+  if (loadMoreButton) {
+    loadMoreButton.addEventListener("click", () => {
+      visibleLimit += pageSize;
+      applyFilters();
     });
   }
 

@@ -629,6 +629,7 @@ def render_footer(nested: bool = False) -> str:
     <footer class="site-footer">
       <p>세븐홈케어 · 홍프로집박사</p>
       <p><a href="{prefix}index.html">홈으로</a></p>
+      <p class="site-credit">Powered by <a href="https://whmarketing.org/ko/?utm_source=sevenhomecare&amp;utm_medium=referral&amp;utm_campaign=portfolio_attribution" target="_blank" rel="noopener noreferrer">Whitehat Marketing</a></p>
     </footer>"""
 
 

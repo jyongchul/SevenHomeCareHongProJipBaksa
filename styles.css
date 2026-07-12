@@ -695,15 +695,6 @@ a {
   content: none;
 }
 
-.process-list strong,
-.process-list span {
-  display: block;
-}
-
-.process-list span {
-  color: var(--muted);
-}
-
 .process-showcase-section {
   background: #f8faf9;
 }

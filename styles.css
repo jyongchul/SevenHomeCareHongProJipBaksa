@@ -1041,7 +1041,9 @@ a {
 
 .site-footer {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 20px;
   padding: 28px 40px;
   color: var(--muted);
@@ -1051,6 +1053,24 @@ a {
 
 .site-footer p {
   margin: 0;
+}
+
+.site-footer .site-credit {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.site-footer .site-credit a {
+  color: #0f172a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-footer .site-credit a:hover,
+.site-footer .site-credit a:focus-visible {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .text-link {

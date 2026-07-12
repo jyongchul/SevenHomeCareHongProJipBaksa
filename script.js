@@ -4,6 +4,23 @@ if (year) {
   year.textContent = String(new Date().getFullYear());
 }
 
+function ensureWhitehatAttribution() {
+  const footer = document.querySelector(".site-footer");
+  if (!footer || footer.querySelector(".site-credit")) return;
+
+  const credit = document.createElement("p");
+  credit.className = "site-credit";
+  credit.append("Powered by ");
+
+  const link = document.createElement("a");
+  link.href = "https://whmarketing.org/ko/?utm_source=sevenhomecare&utm_medium=referral&utm_campaign=portfolio_attribution";
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = "Whitehat Marketing";
+  credit.append(link);
+  footer.append(credit);
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -200,5 +217,6 @@ function setupProcessShowcase() {
 }
 
 loadLatestPosts();
+ensureWhitehatAttribution();
 setupBlogFilters();
 setupProcessShowcase();

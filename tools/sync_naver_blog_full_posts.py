@@ -49,6 +49,51 @@ TEXT_REPLACEMENTS = {
 SERVICE_AREAS = ("서울", "경기", "인천", "성남", "분당", "수원", "부천", "남양주", "하남")
 SERVICE_TYPES = ("유리 타공", "에어컨 배관 타공", "중문 수리", "슬라이딩 도어 수리", "붙박이장 롤러 교체", "벽지 보수", "욕실 보수", "생활 보수")
 
+CONTENT_GUIDES = {
+    "유리타공": {
+        "image": "service-glass-drilling.webp",
+        "alt": "보호 작업 후 유리에 배관 구멍을 타공하는 과정 설명 이미지",
+        "overview": "유리 종류와 프레임 간격, 배관 동선을 먼저 확인하고 주변을 보호한 뒤 타공과 마감 상태를 점검하는 작업입니다.",
+        "media_note": "사진에서는 타공 전 위치와 간섭 요소, 보호 상태, 원형 가공면과 마감 결과를 차례로 확인해 보세요.",
+    },
+    "중문수리": {
+        "image": "service-sliding-door.webp",
+        "alt": "3연동 중문의 레일과 부속을 점검하는 과정 설명 이미지",
+        "overview": "문짝 움직임과 레일, 벨트, 롤러, 댐퍼의 연결 상태를 함께 확인하고 필요한 부속을 교체한 뒤 작동감을 조정합니다.",
+        "media_note": "전체 문짝의 정렬과 고장 부위를 함께 보면 부속 교체 전후의 움직임이 어떻게 달라졌는지 이해하기 쉽습니다.",
+    },
+    "붙박이장": {
+        "image": "service-closet-roller.webp",
+        "alt": "붙박이장 슬라이딩 도어의 하부 롤러를 교체하는 과정 설명 이미지",
+        "overview": "문 처짐과 레일 간섭을 확인하고 파손되거나 마모된 롤러를 교체한 뒤 문짝 높이와 좌우 간격을 맞춥니다.",
+        "media_note": "문 전체 상태, 기존 롤러의 손상, 교체 부속, 레일 위에서의 최종 정렬 순서로 살펴보면 작업 흐름이 분명합니다.",
+    },
+    "벽지보수": {
+        "image": "service-wallpaper-repair.webp",
+        "alt": "찢어지고 들뜬 벽지의 결을 맞춰 복원하는 과정 설명 이미지",
+        "overview": "손상 크기와 벽지 무늬, 들뜬 범위를 확인하고 주변 손상을 넓히지 않도록 정리한 뒤 표면 결을 맞춰 마감합니다.",
+        "media_note": "근접 사진과 벽 전체 사진을 함께 보면 손상 범위와 복원 후 주변 벽지와의 연결 상태를 비교할 수 있습니다.",
+    },
+    "욕실보수": {
+        "image": "service-bathroom-repair.webp",
+        "alt": "욕실 샤워부스 물막이와 부속을 점검하는 과정 설명 이미지",
+        "overview": "누수 흔적과 물막이, 실리콘, 도어 부속 상태를 확인하고 물이 흐르는 방향에 맞춰 필요한 부분을 교체하거나 보강합니다.",
+        "media_note": "물 사용 전 상태와 손상 부위, 새 부속의 체결 상태, 물막이와 마감선을 순서대로 확인해 보세요.",
+    },
+    "상가작업": {
+        "image": "service-glass-drilling.webp",
+        "alt": "상가 유리와 설비 위치를 확인하는 작업 과정 설명 이미지",
+        "overview": "영업 공간의 동선과 주변 설비, 마감재를 먼저 확인하고 작업 구역을 보호한 뒤 필요한 수리나 타공을 진행합니다.",
+        "media_note": "전체 공간과 작업 지점의 근접 사진을 함께 보면 주변 설비와 마감재를 어떻게 보호했는지 확인할 수 있습니다.",
+    },
+    "생활보수": {
+        "image": "service-home-hardware.webp",
+        "alt": "생활 공간의 문과 하드웨어를 점검하는 과정 설명 이미지",
+        "overview": "불편이 생긴 위치와 부속 상태를 확인하고 주변 마감재를 보호하면서 필요한 조정, 체결, 교체 작업을 진행합니다.",
+        "media_note": "작업 전 증상과 문제 부위, 사용한 부속, 완료 후 작동 상태가 사진에서 이어지는지 확인해 보세요.",
+    },
+}
+
 BLOGS = [
     {
         "id": "cadzone77",
@@ -323,6 +368,8 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
     for module in soup.find_all("div", class_=lambda value: value and "se-module" in value):
         classes = module.get("class", [])
         if "se-module-text" in classes:
+            if "se-caption" in classes:
+                continue
             text = normalize_public_text(module.get_text("\n", strip=True))
             if not text or any(pattern in text for pattern in SKIP_TEXT_PATTERNS):
                 continue
@@ -341,6 +388,9 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
                 continue
             seen_images.add(src)
             alt = normalize_public_text(image.get("alt") or title)
+            section = module.find_parent("div", class_=lambda value: value and "se-section-image" in value)
+            caption_element = section.select_one(".se-caption") if section else None
+            caption = normalize_public_text(caption_element.get_text(" ", strip=True)) if caption_element else ""
             link = ""
             parent = image.find_parent("a")
             if parent:
@@ -354,10 +404,17 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
                     href = parent.get("href") or ""
                     if href and not href.startswith("javascript:") and href != "#":
                         link = href
-            elements.append({"type": "image", "src": src, "alt": alt, "link": link})
+            elements.append({"type": "image", "src": src, "alt": alt, "link": link, "caption": caption})
 
     page_path = f"blog-pages/post-{meta.log_no}.html"
-    thumbnail = next((element["src"] for element in elements if element.get("type") == "image"), "")
+    image_elements = [element for element in elements if element.get("type") == "image"]
+    local_photos = sorted((SITE / "assets" / "blog-local" / meta.log_no).glob("*.webp"))
+    if local_photos and len(local_photos) == len(image_elements):
+        for element, local_photo in zip(image_elements, local_photos):
+            element["src"] = f"../assets/blog-local/{meta.log_no}/{local_photo.name}"
+        thumbnail = f"assets/blog-local/{meta.log_no}/{local_photos[0].name}"
+    else:
+        thumbnail = next((element["src"] for element in image_elements), "")
     text_blob = soup.get_text("\n", strip=True)
     naver_tags = sorted(set(re.findall(r"#[가-힣A-Za-z0-9_]+", text_blob)))[:12]
     tags = list(dict.fromkeys(meta.tags + [tag.lstrip("#") for tag in naver_tags]))[:8]
@@ -568,20 +625,58 @@ def post_schema(post: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
-def render_elements(elements: list[dict[str, str]], original_url: str) -> str:
-    parts: list[str] = []
+def content_guide(post: dict[str, Any]) -> dict[str, str]:
+    title = post.get("title", "")
+    category = post.get("category") or "생활보수"
+    if any(word in title for word in ("붙박이장", "장롱", "옷장", "롤러")):
+        category = "붙박이장"
+    return CONTENT_GUIDES.get(category, CONTENT_GUIDES["생활보수"])
+
+
+def image_phase(index: int, total: int) -> str:
+    progress = index / max(total, 1)
+    if progress <= 0.25:
+        return "작업 전 전체 상태와 불편 증상을 확인한 현장 기록"
+    if progress <= 0.5:
+        return "손상 부위와 관련 부속을 가까이 확인한 현장 기록"
+    if progress <= 0.75:
+        return "분리, 교체 또는 조정 과정을 확인한 현장 기록"
+    return "마감 후 정렬과 작동 상태를 확인한 현장 기록"
+
+
+def render_elements(post: dict[str, Any]) -> str:
+    elements = post.get("elements", [])
+    original_url = post["url"]
+    guide = content_guide(post)
+    image_total = sum(element.get("type") == "image" for element in elements)
+    excerpt = html.escape(normalize_public_text(post.get("excerpt") or fallback_excerpt(post.get("title", ""))))
+    parts: list[str] = [
+        f'<p class="post-lead">{excerpt}</p>',
+        '<section class="post-work-overview" aria-labelledby="work-overview-title">'
+        '<h2 id="work-overview-title">이번 작업의 확인 포인트</h2>'
+        f'<p>{html.escape(guide["overview"])}</p></section>',
+        '<figure class="post-guide-figure">'
+        f'<img class="post-image" src="../assets/visuals/{escape_attr(guide["image"])}" '
+        f'alt="{escape_attr(guide["alt"])}" width="1440" height="1080" loading="lazy" />'
+        '<figcaption><strong>작업 이해를 돕는 설명 이미지</strong>'
+        '<span>현장 이해를 위해 제작한 설명용 이미지이며, 실제 작업 기록은 아래 현장 사진에서 확인할 수 있습니다.</span>'
+        '</figcaption></figure>',
+    ]
+    image_index = 0
     for element in elements:
         if element.get("type") == "text":
-            lines = [html.escape(normalize_public_text(line)) for line in element.get("content", "").split("\n") if line.strip()]
-            if not lines:
-                continue
-            text = "<br />\n".join(lines)
-            if len(lines) == 1 and len(lines[0]) < 48 and not lines[0].endswith((".", "요", "다")):
-                parts.append(f'<p class="post-subhead">{text}</p>')
-            else:
-                parts.append(f"<p>{text}</p>")
+            for raw_line in element.get("content", "").split("\n"):
+                normalized = normalize_public_text(raw_line)
+                if not normalized:
+                    continue
+                text = html.escape(normalized)
+                if len(normalized) < 48 and not normalized.endswith((".", "요", "다")):
+                    parts.append(f'<h2 class="post-subhead">{text}</h2>')
+                else:
+                    parts.append(f"<p>{text}</p>")
             continue
         if element.get("type") == "image":
+            image_index += 1
             img = (
                 f'<img class="post-image" src="{escape_attr(element.get("src", ""))}" '
                 f'alt="{escape_attr(normalize_public_text(element.get("alt", "작업 이미지")))}" '
@@ -591,13 +686,22 @@ def render_elements(elements: list[dict[str, str]], original_url: str) -> str:
             link = normalize_public_link(element.get("link") or "")
             if link:
                 img = f'<a class="post-image-link" href="{escape_attr(link)}" target="_blank" rel="noreferrer">{img}</a>'
-            parts.append(f"<figure>{img}</figure>")
-    if parts:
-        return "\n".join(parts)
-    return (
-        "<p>이 포스팅의 본문을 자동으로 가져오지 못했습니다. "
-        f'<a href="{escape_attr(original_url)}" target="_blank" rel="noreferrer">원문 블로그</a>에서 내용을 확인해주세요.</p>'
-    )
+            caption = normalize_public_text(element.get("caption") or "") or image_phase(image_index, image_total)
+            parts.append(
+                f'<figure>{img}<figcaption><strong>현장 사진 {image_index}/{image_total}</strong>'
+                f'<span>{html.escape(caption)}</span></figcaption></figure>'
+            )
+            if image_index % 3 == 0 and image_index < image_total:
+                parts.append(
+                    '<aside class="post-media-note"><strong>사진에서 이어서 볼 부분</strong>'
+                    f'<p>{html.escape(guide["media_note"])}</p></aside>'
+                )
+    if len(parts) == 3:
+        parts.append(
+            "<p>이 포스팅의 현장 본문을 자동으로 가져오지 못했습니다. "
+            f'<a href="{escape_attr(original_url)}" target="_blank" rel="noreferrer">원문 블로그</a>에서 내용을 확인해주세요.</p>'
+        )
+    return "\n".join(parts)
 
 
 def render_header(active: str = "blog", nested: bool = False) -> str:
@@ -636,7 +740,7 @@ def render_footer(nested: bool = False) -> str:
 def render_post_page(post: dict[str, Any], previous_post: dict[str, Any] | None, next_post: dict[str, Any] | None) -> str:
     title = post["title"]
     description = post["excerpt"][:155]
-    content = render_elements(post.get("elements", []), post["url"])
+    content = render_elements(post)
     tags = "".join(f"<span>{html.escape(tag)}</span>" for tag in post.get("tags", [])[:10])
     previous_link = (
         f'<a href="../{escape_attr(previous_post["page_path"])}">이전 글</a>' if previous_post else "<span></span>"
@@ -738,7 +842,7 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
         counts[post["brand"]] = counts.get(post["brand"], 0) + 1
     stats = " · ".join(f"{brand} {count:,}건" for brand, count in counts.items())
     cards = "\n".join(render_blog_card(post) for post in posts)
-    description = "세븐홈케어, 홍프로집박사, 기찬집수리의 실제 네이버 블로그 포스팅 1,176건을 웹사이트에서 확인할 수 있습니다."
+    description = f"세븐홈케어, 홍프로집박사, 기찬집수리의 실제 네이버 블로그 포스팅 {len(posts):,}건을 웹사이트에서 확인할 수 있습니다."
     return f"""<!doctype html>
 <html lang="ko">
   <head>

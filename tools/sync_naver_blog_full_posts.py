@@ -779,6 +779,7 @@ def render_post_page(post: dict[str, Any], previous_post: dict[str, Any] | None,
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{html.escape(title)} | 세븐홈케어 블로그</title>
+    <link rel="icon" type="image/jpeg" href="../assets/generated-repair-hero.jpg" />
     <meta name="description" content="{escape_attr(description)}" />
 {head_meta}
     <meta property="article:published_time" content="{escape_attr(post.get("date_iso", ""))}" />
@@ -869,6 +870,7 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>블로그 | 세븐홈케어</title>
+    <link rel="icon" type="image/jpeg" href="./assets/generated-repair-hero.jpg" />
     <meta name="description" content="{escape_attr(description)}" />
 {meta_tags("블로그 | 세븐홈케어", description, "blog.html")}
     <link rel="stylesheet" href="./styles.css" />

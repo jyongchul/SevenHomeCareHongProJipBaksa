@@ -120,6 +120,28 @@ a {
   color: var(--green);
 }
 
+.mobile-nav-toggle {
+  display: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(26, 54, 93, 0.24);
+  border-radius: 8px;
+  color: var(--navy);
+  background: #ffffff;
+  font: inherit;
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mobile-nav-toggle:hover,
+.mobile-nav-toggle:focus-visible {
+  border-color: var(--navy);
+  background: #f8fafc;
+}
+
 .header-call {
   justify-self: end;
   padding: 10px 14px;
@@ -801,7 +823,7 @@ a {
   bottom: 0;
   padding: 24px;
   color: #ffffff;
-  background: linear-gradient(180deg, rgba(16, 43, 58, 0), rgba(16, 43, 58, 0.92));
+  background: rgba(16, 43, 58, 0.9);
 }
 
 .process-media-card figcaption strong,
@@ -1834,16 +1856,52 @@ a {
 
 @media (max-width: 1040px) {
   .site-header {
-    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand call toggle"
+      "nav nav nav";
+    grid-template-columns: minmax(0, 1fr) auto auto;
     gap: 12px;
     padding: 12px 24px;
   }
 
+  .brand {
+    grid-area: brand;
+  }
+
+  .header-call {
+    grid-area: call;
+  }
+
+  .mobile-nav-toggle {
+    grid-area: toggle;
+    display: grid;
+  }
+
   .top-nav {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-content: start;
-    overflow-x: auto;
+    display: grid;
+    grid-area: nav;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0;
+    width: 100%;
+    padding: 8px;
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 8px 22px rgba(26, 54, 93, 0.1);
+  }
+
+  .site-header.mobile-nav-ready .top-nav {
+    display: none;
+  }
+
+  .site-header.mobile-nav-ready .top-nav.is-open {
+    display: grid;
+  }
+
+  .top-nav a {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
   }
 
   .hero {
@@ -1928,8 +1986,8 @@ a {
 
 @media (max-width: 700px) {
   .site-header {
-    position: static;
-    padding: 12px 18px;
+    position: sticky;
+    padding: 10px 16px;
   }
 
   .brand {
@@ -1942,8 +2000,13 @@ a {
   }
 
   .top-nav {
-    gap: 18px;
+    grid-template-columns: 1fr;
+    gap: 0;
     font-size: 0.88rem;
+  }
+
+  .top-nav a:last-child {
+    border-bottom: 0;
   }
 
   .hero {

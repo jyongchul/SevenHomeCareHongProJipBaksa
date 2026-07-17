@@ -21,6 +21,61 @@ function ensureWhitehatAttribution() {
   footer.append(credit);
 }
 
+function setupMobileNavigation() {
+  const header = document.querySelector(".site-header");
+  const nav = header?.querySelector(".top-nav");
+  if (!header || !nav || header.querySelector(".mobile-nav-toggle")) return;
+
+  if (!nav.id) nav.id = "primary-navigation";
+
+  const button = document.createElement("button");
+  button.className = "mobile-nav-toggle";
+  button.type = "button";
+  button.setAttribute("aria-controls", nav.id);
+  button.setAttribute("aria-expanded", "false");
+  button.setAttribute("aria-label", "메뉴 열기");
+  button.title = "메뉴 열기";
+
+  const icon = document.createElement("span");
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = "☰";
+  button.append(icon);
+  header.append(button);
+  header.classList.add("mobile-nav-ready");
+
+  function setOpen(open) {
+    nav.classList.toggle("is-open", open);
+    button.setAttribute("aria-expanded", String(open));
+    button.setAttribute("aria-label", open ? "메뉴 닫기" : "메뉴 열기");
+    button.title = open ? "메뉴 닫기" : "메뉴 열기";
+    icon.textContent = open ? "×" : "☰";
+  }
+
+  button.addEventListener("click", () => {
+    setOpen(button.getAttribute("aria-expanded") !== "true");
+  });
+
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => setOpen(false));
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!header.contains(event.target)) setOpen(false);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      setOpen(false);
+      button.focus();
+    }
+  });
+
+  const desktopQuery = window.matchMedia("(min-width: 1041px)");
+  desktopQuery.addEventListener?.("change", (event) => {
+    if (event.matches) setOpen(false);
+  });
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -218,5 +273,6 @@ function setupProcessShowcase() {
 
 loadLatestPosts();
 ensureWhitehatAttribution();
+setupMobileNavigation();
 setupBlogFilters();
 setupProcessShowcase();

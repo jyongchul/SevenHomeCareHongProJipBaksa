@@ -161,7 +161,7 @@ a {
   color: #ffffff;
   background-image:
     linear-gradient(90deg, rgba(10, 26, 39, 0.88), rgba(14, 50, 58, 0.56) 52%, rgba(14, 50, 58, 0.14)),
-    url("./assets/generated-repair-hero.jpg");
+    url("./assets/blog-local/224343909804/03-69774.webp");
   background-position: center;
   background-size: cover;
 }
@@ -594,9 +594,7 @@ a {
 .case-media {
   position: relative;
   overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(16, 43, 58, 0.1), rgba(16, 43, 58, 0.26)),
-    url("./assets/generated-repair-hero.jpg") center / cover;
+  background: #e8eef1;
 }
 
 .case-media::after {
@@ -1190,9 +1188,7 @@ a {
 .blog-card-media {
   position: relative;
   overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(16, 43, 58, 0.08), rgba(16, 43, 58, 0.28)),
-    url("./assets/generated-repair-hero.jpg") center / cover;
+  background: #e8eef1;
 }
 
 .latest-post-media img,
@@ -1204,9 +1200,8 @@ a {
 
 .latest-post-media .blog-card-placeholder,
 .blog-card-media .blog-card-placeholder {
-  background:
-    linear-gradient(180deg, rgba(16, 43, 58, 0.16), rgba(16, 43, 58, 0.72)),
-    url("./assets/generated-repair-hero.jpg") center / cover;
+  color: #ffffff;
+  background: linear-gradient(145deg, #1a365d, #2d6a4f);
 }
 
 .latest-post-media span,
@@ -1263,7 +1258,7 @@ a {
   color: #ffffff;
   background:
     linear-gradient(90deg, rgba(16, 43, 58, 0.94), rgba(22, 116, 84, 0.84)),
-    url("./assets/generated-repair-hero.jpg") center / cover;
+    url("./assets/blog-local/224343905876/03-69760.webp") center / cover;
 }
 
 .blog-hero h1,
@@ -1721,9 +1716,7 @@ a {
   overflow: hidden;
   min-height: 220px;
   border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(16, 43, 58, 0.08), rgba(16, 43, 58, 0.25)),
-    url("./assets/generated-repair-hero.jpg") center / cover;
+  background: #e8eef1;
 }
 
 .post-content figure figcaption {

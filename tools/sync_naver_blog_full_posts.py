@@ -27,13 +27,13 @@ BLOG_PAGES = SITE / "blog-pages"
 SITEMAP = SITE / "sitemap.xml"
 ROBOTS = SITE / "robots.txt"
 LLMS = SITE / "llms.txt"
-BASE_URL = "http://sevenhomecare.co.kr/"
+BASE_URL = "https://sevenhomecare.co.kr/"
 SITE_NAME = "세븐홈케어 · 홍프로집박사"
 SITE_DESCRIPTION = (
     "서울, 경기, 인천 생활 보수 전문 세븐홈케어와 홍프로집박사의 유리 타공, "
     "중문 수리, 붙박이장 롤러, 벽지 보수 작업 기록과 점검 안내."
 )
-DEFAULT_IMAGE = "assets/generated-repair-hero.jpg"
+DEFAULT_IMAGE = "assets/blog-local/224343909804/03-69774.webp"
 PHONE = "010-9435-9429"
 PHONE_REPLACEMENTS = {
     "010-5943-3925",
@@ -779,7 +779,8 @@ def render_post_page(post: dict[str, Any], previous_post: dict[str, Any] | None,
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{html.escape(title)} | 세븐홈케어 블로그</title>
-    <link rel="icon" type="image/jpeg" href="../assets/generated-repair-hero.jpg" />
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <meta name="theme-color" content="#1a365d" />
     <meta name="description" content="{escape_attr(description)}" />
 {head_meta}
     <meta property="article:published_time" content="{escape_attr(post.get("date_iso", ""))}" />
@@ -870,7 +871,8 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>블로그 | 세븐홈케어</title>
-    <link rel="icon" type="image/jpeg" href="./assets/generated-repair-hero.jpg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta name="theme-color" content="#1a365d" />
     <meta name="description" content="{escape_attr(description)}" />
 {meta_tags("블로그 | 세븐홈케어", description, "blog.html")}
     <link rel="stylesheet" href="./styles.css" />

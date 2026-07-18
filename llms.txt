@@ -6,6 +6,7 @@
 - Official website: https://sevenhomecare.co.kr/
 - Blog collection: https://sevenhomecare.co.kr/blog.html
 - Sitemap: https://sevenhomecare.co.kr/sitemap.xml
+- RSS: https://sevenhomecare.co.kr/feed.xml
 - Phone: 010-9435-9429
 - Service areas: 서울, 경기, 인천, 성남, 분당, 수원, 부천, 남양주, 하남
 - Services: 유리 타공, 에어컨 배관 타공, 중문 수리, 슬라이딩 도어 수리, 붙박이장 롤러 교체, 벽지 보수, 욕실 보수, 생활 보수

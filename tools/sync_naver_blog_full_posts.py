@@ -11,8 +11,8 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from datetime import datetime
-from email.utils import parsedate_to_datetime
+from datetime import datetime, timedelta, timezone
+from email.utils import format_datetime, parsedate_to_datetime
 from pathlib import Path
 from typing import Any
 
@@ -27,6 +27,7 @@ BLOG_PAGES = SITE / "blog-pages"
 SITEMAP = SITE / "sitemap.xml"
 ROBOTS = SITE / "robots.txt"
 LLMS = SITE / "llms.txt"
+RSS = SITE / "feed.xml"
 BASE_URL = "https://sevenhomecare.co.kr/"
 SITE_NAME = "세븐홈케어 · 홍프로집박사"
 SITE_DESCRIPTION = (
@@ -620,7 +621,7 @@ def post_schema(post: dict[str, Any]) -> dict[str, Any]:
         "mainEntityOfPage": canonical,
         "url": canonical,
         "headline": post["title"],
-        "description": post.get("excerpt") or SITE_DESCRIPTION,
+        "description": post_seo_description(post),
         "inLanguage": "ko-KR",
         "articleSection": post.get("category") or "생활 보수",
         "keywords": post.get("tags", []),
@@ -643,6 +644,24 @@ def post_schema(post: dict[str, Any]) -> dict[str, Any]:
         data["datePublished"] = post["date_iso"]
         data["dateModified"] = post["date_iso"]
     return data
+
+
+def post_seo_title(post: dict[str, Any]) -> str:
+    date_label = (post.get("date_iso") or post.get("log_no") or "").replace("-", ".")
+    suffix = " ".join(value for value in (post.get("brand"), date_label) if value)
+    return f"{post['title']} | {suffix}" if suffix else f"{post['title']} | 세븐홈케어"
+
+
+def post_seo_description(post: dict[str, Any]) -> str:
+    title = normalize_public_text(post.get("title") or "")
+    brand = normalize_public_text(post.get("brand") or SITE_NAME)
+    category = normalize_public_text(post.get("category") or "생활 보수")
+    date_label = (post.get("date_iso") or "").replace("-", ".")
+    prefix = f"{title}. {date_label} {brand}가 {category} 관련 증상, 확인 순서와 관리 포인트를 사진과 본문으로 정리했습니다."
+    excerpt = normalize_public_text(post.get("excerpt") or "")
+    if excerpt and excerpt not in prefix:
+        prefix = f"{prefix} {excerpt}"
+    return prefix[:155]
 
 
 def content_guide(post: dict[str, Any]) -> dict[str, str]:
@@ -759,7 +778,8 @@ def render_footer(nested: bool = False) -> str:
 
 def render_post_page(post: dict[str, Any], previous_post: dict[str, Any] | None, next_post: dict[str, Any] | None) -> str:
     title = post["title"]
-    description = post["excerpt"][:155]
+    seo_title = post_seo_title(post)
+    description = post_seo_description(post)
     content = render_elements(post)
     tags = "".join(f"<span>{html.escape(tag)}</span>" for tag in post.get("tags", [])[:10])
     previous_link = (
@@ -767,7 +787,7 @@ def render_post_page(post: dict[str, Any], previous_post: dict[str, Any] | None,
     )
     next_link = f'<a href="../{escape_attr(next_post["page_path"])}">다음 글</a>' if next_post else "<span></span>"
     head_meta = meta_tags(
-        f"{title} | 세븐홈케어 블로그",
+        seo_title,
         description,
         post["page_path"],
         post.get("thumbnail", ""),
@@ -778,8 +798,9 @@ def render_post_page(post: dict[str, Any], previous_post: dict[str, Any] | None,
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{html.escape(title)} | 세븐홈케어 블로그</title>
+    <title>{html.escape(seo_title)}</title>
     <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="세븐홈케어 블로그 RSS" href="{public_url('feed.xml')}" />
     <meta name="theme-color" content="#1a365d" />
     <meta name="description" content="{escape_attr(description)}" />
 {head_meta}
@@ -872,6 +893,7 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>블로그 | 세븐홈케어</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="세븐홈케어 블로그 RSS" href="{public_url('feed.xml')}" />
     <meta name="theme-color" content="#1a365d" />
     <meta name="description" content="{escape_attr(description)}" />
 {meta_tags("블로그 | 세븐홈케어", description, "blog.html")}
@@ -983,6 +1005,47 @@ Sitemap: {public_url("sitemap.xml")}
 """
 
 
+def render_rss(posts: list[dict[str, Any]]) -> str:
+    def pub_date(value: str) -> str:
+        try:
+            parsed = datetime.fromisoformat(value)
+        except ValueError:
+            parsed = datetime.now(timezone.utc)
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone(timedelta(hours=9)))
+        return format_datetime(parsed)
+
+    items = []
+    for post in posts[:100]:
+        link = public_url(post["page_path"])
+        items.append(
+            "\n".join(
+                [
+                    "    <item>",
+                    f"      <title>{html.escape(post['title'])}</title>",
+                    f"      <link>{html.escape(link)}</link>",
+                    f"      <description>{html.escape(post.get('excerpt') or SITE_DESCRIPTION)}</description>",
+                    f"      <pubDate>{pub_date(post.get('date_iso') or '')}</pubDate>",
+                    f'      <guid isPermaLink="true">{html.escape(link)}</guid>',
+                    "    </item>",
+                ]
+            )
+        )
+    return f"""<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{html.escape(SITE_NAME)} 블로그</title>
+    <link>{html.escape(public_url("blog.html"))}</link>
+    <description>{html.escape(SITE_DESCRIPTION)}</description>
+    <language>ko-KR</language>
+    <lastBuildDate>{format_datetime(datetime.now(timezone.utc))}</lastBuildDate>
+    <atom:link href="{html.escape(public_url('feed.xml'))}" rel="self" type="application/rss+xml" />
+{chr(10).join(items)}
+  </channel>
+</rss>
+"""
+
+
 def render_llms(posts: list[dict[str, Any]]) -> str:
     counts: dict[str, int] = {}
     for post in posts:
@@ -1003,6 +1066,7 @@ def render_llms(posts: list[dict[str, Any]]) -> str:
 - Official website: {BASE_URL}
 - Blog collection: {public_url("blog.html")}
 - Sitemap: {public_url("sitemap.xml")}
+- RSS: {public_url("feed.xml")}
 - Phone: {PHONE}
 - Service areas: {areas}
 - Services: {services}
@@ -1118,6 +1182,7 @@ def main() -> int:
     update_homepage_metrics(light_posts)
     SITEMAP.write_text(render_sitemap(light_posts), encoding="utf-8")
     ROBOTS.write_text(render_robots(), encoding="utf-8")
+    RSS.write_text(render_rss(light_posts), encoding="utf-8")
     LLMS.write_text(render_llms(light_posts), encoding="utf-8")
 
     counts: dict[str, int] = {}

@@ -50,7 +50,7 @@ TEXT_REPLACEMENTS = {
     "홈페이지나 블로그 포트폴리오": "웹사이트와 블로그의 실제 시공 사례",
 }
 SERVICE_AREAS = ("서울", "경기", "인천", "성남", "분당", "수원", "부천", "남양주", "하남")
-SERVICE_TYPES = ("유리 타공", "에어컨 배관 타공", "중문 수리", "슬라이딩 도어 수리", "붙박이장 롤러 교체", "벽지 보수", "욕실 보수", "생활 보수")
+SERVICE_TYPES = ("유리 타공", "에어컨 배관 타공", "중문 수리", "슬라이딩 도어 수리", "붙박이장 롤러 교체", "벽지 보수", "바닥 보수", "욕실 보수", "생활 보수")
 
 CONTENT_GUIDES = {
     "유리타공": {
@@ -76,6 +76,12 @@ CONTENT_GUIDES = {
         "alt": "찢어지고 들뜬 벽지의 결을 맞춰 복원하는 과정 설명 이미지",
         "overview": "손상 크기와 벽지 무늬, 들뜬 범위를 확인하고 주변 손상을 넓히지 않도록 정리한 뒤 표면 결을 맞춰 마감합니다.",
         "media_note": "근접 사진과 벽 전체 사진을 함께 보면 손상 범위와 복원 후 주변 벽지와의 연결 상태를 비교할 수 있습니다.",
+    },
+    "바닥보수": {
+        "image": "service-home-hardware.webp",
+        "alt": "마루 손상 범위와 주변 바닥 높이를 확인하는 과정 설명 이미지",
+        "overview": "마루의 들뜸, 벌어짐, 찍힘, 변색 범위와 주변 판재 상태를 확인하고 손상 원인과 마감 방식에 맞춰 부분 보수합니다.",
+        "media_note": "전체 바닥 배치, 손상 부위 근접 상태, 제거 또는 고정 과정, 무늬와 높이를 맞춘 마감 결과 순서로 확인해 보세요.",
     },
     "욕실보수": {
         "image": "service-bathroom-repair.webp",
@@ -248,6 +254,7 @@ def infer_tags(title: str) -> list[str]:
         ),
         ("중문수리", ["중문", "3연동", "포켓도어", "슬라이딩", "레일"]),
         ("붙박이장", ["붙박이장", "롤러", "장롱", "옷장"]),
+        ("바닥보수", ["강화마루", "강마루", "마루", "장판", "데코타일"]),
         ("벽지보수", ["벽지", "시트지", "문틀", "방문", "복원", "구멍"]),
         ("욕실보수", ["샤워부스", "쫄대", "절수", "욕실", "화장실"]),
         ("상가작업", ["상가", "신축", "매장", "사무실"]),
@@ -255,6 +262,10 @@ def infer_tags(title: str) -> list[str]:
     found = [label for label, words in candidates if any(word in title for word in words)]
     if "유리타공" in found and not any(
         word in title for word in ("벽지", "시트지", "문틀", "방문", "복원")
+    ):
+        found = [label for label in found if label != "벽지보수"]
+    if "바닥보수" in found and not any(
+        word in title for word in ("벽지", "문틀", "방문", "현관문", "문짝")
     ):
         found = [label for label in found if label != "벽지보수"]
     return found[:3] or ["생활보수"]
@@ -267,6 +278,10 @@ def infer_category(title: str, tags: list[str]) -> str:
         return "중문수리"
     if "붙박이장" in tags:
         return "붙박이장"
+    if "바닥보수" in tags or any(
+        word in title for word in ("강화마루", "강마루", "마루", "장판", "데코타일")
+    ):
+        return "바닥보수"
     if "벽지보수" in tags:
         return "벽지보수"
     if "욕실보수" in tags:
@@ -284,6 +299,8 @@ def fallback_excerpt(title: str) -> str:
         return "문 움직임과 부속 상태를 확인해 작동 문제를 해결한 사례입니다."
     if "붙박이장" in tags:
         return "슬라이딩 도어와 레일 부속을 점검한 수리 사례입니다."
+    if "바닥보수" in tags:
+        return "마루 손상 범위와 주변 바닥 상태를 확인해 부분 보수한 사례입니다."
     if "벽지보수" in tags:
         return "훼손 부위를 확인하고 필요한 보수 범위를 정리한 사례입니다."
     if "욕실보수" in tags:
@@ -459,6 +476,8 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
         )
     )[:8]
     category = infer_category(title, tags)
+    if category == "바닥보수":
+        tags = list(dict.fromkeys(["바닥보수", *[tag for tag in tags if tag != "벽지보수"]]))[:8]
     excerpt = first_text_excerpt(elements, meta.excerpt)
 
     return {
@@ -969,6 +988,7 @@ def render_blog_page(posts: list[dict[str, Any]]) -> str:
               <button type="button" class="blog-filter" data-filter="유리타공">유리타공</button>
               <button type="button" class="blog-filter" data-filter="중문수리">중문수리</button>
               <button type="button" class="blog-filter" data-filter="벽지보수">벽지보수</button>
+              <button type="button" class="blog-filter" data-filter="바닥보수">바닥보수</button>
               <button type="button" class="blog-filter" data-filter="생활보수">생활보수</button>
               <button type="button" class="blog-filter" data-filter="붙박이장">붙박이장</button>
               <button type="button" class="blog-filter" data-filter="욕실보수">욕실보수</button>
@@ -1128,6 +1148,7 @@ def update_homepage_metrics(posts: list[dict[str, Any]]) -> None:
         "category:붙박이장": category_counts.get("붙박이장", 0),
         "category:욕실보수": category_counts.get("욕실보수", 0),
         "combined:벽지생활": category_counts.get("벽지보수", 0)
+        + category_counts.get("바닥보수", 0)
         + category_counts.get("생활보수", 0),
     }
 

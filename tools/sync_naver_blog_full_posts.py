@@ -233,7 +233,19 @@ def rss_index(blog_id: str) -> dict[str, dict[str, str]]:
 
 def infer_tags(title: str) -> list[str]:
     candidates = [
-        ("유리타공", ["유리타공", "유리 타공", "이중유리", "페어", "65파이", "65mm"]),
+        (
+            "유리타공",
+            [
+                "유리타공",
+                "유리 타공",
+                "이중유리",
+                "페어",
+                "65파이",
+                "65mm",
+                "80파이",
+                "80mm",
+            ],
+        ),
         ("중문수리", ["중문", "3연동", "포켓도어", "슬라이딩", "레일"]),
         ("붙박이장", ["붙박이장", "롤러", "장롱", "옷장"]),
         ("벽지보수", ["벽지", "시트지", "문틀", "방문", "복원", "구멍"]),
@@ -241,6 +253,10 @@ def infer_tags(title: str) -> list[str]:
         ("상가작업", ["상가", "신축", "매장", "사무실"]),
     ]
     found = [label for label, words in candidates if any(word in title for word in words)]
+    if "유리타공" in found and not any(
+        word in title for word in ("벽지", "시트지", "문틀", "방문", "복원")
+    ):
+        found = [label for label in found if label != "벽지보수"]
     return found[:3] or ["생활보수"]
 
 
@@ -436,7 +452,12 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
         thumbnail = next((element["src"] for element in image_elements), "")
     text_blob = soup.get_text("\n", strip=True)
     naver_tags = sorted(set(re.findall(r"#[가-힣A-Za-z0-9_]+", text_blob)))[:12]
-    tags = list(dict.fromkeys(meta.tags + [tag.lstrip("#") for tag in naver_tags]))[:8]
+    title_tags = infer_tags(title)
+    tags = list(
+        dict.fromkeys(
+            title_tags + meta.tags + [tag.lstrip("#") for tag in naver_tags]
+        )
+    )[:8]
     category = infer_category(title, tags)
     excerpt = first_text_excerpt(elements, meta.excerpt)
 

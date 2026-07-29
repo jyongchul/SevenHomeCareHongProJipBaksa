@@ -723,25 +723,47 @@ def image_phase(index: int, total: int) -> str:
     return "마감 후 정렬과 작동 상태를 확인한 현장 기록"
 
 
+def is_explanatory_guide(post: dict[str, Any]) -> bool:
+    elements = post.get("elements", [])
+    text_blob = " ".join(
+        normalize_public_text(element.get("content", ""))
+        for element in elements
+        if element.get("type") == "text"
+    )
+    if "특정 현장 시공 사례가 아니라" in text_blob:
+        return True
+    images = [element for element in elements if element.get("type") == "image"]
+    return bool(images) and all(
+        "작업 이해를 돕는 설명 이미지"
+        in normalize_public_text(element.get("caption", ""))
+        for element in images
+    )
+
+
 def render_elements(post: dict[str, Any]) -> str:
     elements = post.get("elements", [])
     original_url = post["url"]
     guide = content_guide(post)
+    explanatory_guide = is_explanatory_guide(post)
     image_total = sum(element.get("type") == "image" for element in elements)
     excerpt = html.escape(normalize_public_text(post.get("excerpt") or fallback_excerpt(post.get("title", ""))))
-    parts: list[str] = [
-        f'<p class="post-lead">{excerpt}</p>',
-        '<section class="post-work-overview" aria-labelledby="work-overview-title">'
-        '<h2 id="work-overview-title">이번 작업의 확인 포인트</h2>'
-        f'<p>{html.escape(guide["overview"])}</p></section>',
-        '<figure class="post-guide-figure">'
-        f'<img class="post-image" src="../assets/visuals/{escape_attr(guide["image"])}" '
-        f'alt="{escape_attr(guide["alt"])}" width="1440" height="1080" loading="lazy" />'
-        '<figcaption><strong>작업 이해를 돕는 설명 이미지</strong>'
-        '<span>현장 이해를 위해 제작한 설명용 이미지이며, 실제 작업 기록은 아래 현장 사진에서 확인할 수 있습니다.</span>'
-        '</figcaption></figure>',
-    ]
+    parts: list[str] = [f'<p class="post-lead">{excerpt}</p>']
+    if not explanatory_guide:
+        parts.extend(
+            [
+                '<section class="post-work-overview" aria-labelledby="work-overview-title">'
+                '<h2 id="work-overview-title">이번 작업의 확인 포인트</h2>'
+                f'<p>{html.escape(guide["overview"])}</p></section>',
+                '<figure class="post-guide-figure">'
+                f'<img class="post-image" src="../assets/visuals/{escape_attr(guide["image"])}" '
+                f'alt="{escape_attr(guide["alt"])}" width="1440" height="1080" loading="lazy" />'
+                '<figcaption><strong>작업 이해를 돕는 설명 이미지</strong>'
+                '<span>현장 이해를 위해 제작한 설명용 이미지이며, 실제 작업 기록은 아래 현장 사진에서 확인할 수 있습니다.</span>'
+                '</figcaption></figure>',
+            ]
+        )
     image_index = 0
+    rendered_element_count = 0
     for element in elements:
         if element.get("type") == "text":
             for raw_line in element.get("content", "").split("\n"):
@@ -753,9 +775,11 @@ def render_elements(post: dict[str, Any]) -> str:
                     parts.append(f'<h2 class="post-subhead">{text}</h2>')
                 else:
                     parts.append(f"<p>{text}</p>")
+                rendered_element_count += 1
             continue
         if element.get("type") == "image":
             image_index += 1
+            rendered_element_count += 1
             img = (
                 f'<img class="post-image" src="{escape_attr(element.get("src", ""))}" '
                 f'alt="{escape_attr(normalize_public_text(element.get("alt", "작업 이미지")))}" '
@@ -766,16 +790,21 @@ def render_elements(post: dict[str, Any]) -> str:
             if link:
                 img = f'<a class="post-image-link" href="{escape_attr(link)}" target="_blank" rel="noreferrer">{img}</a>'
             caption = normalize_public_text(element.get("caption") or "") or image_phase(image_index, image_total)
+            media_label = "설명 이미지" if explanatory_guide else "현장 사진"
             parts.append(
-                f'<figure>{img}<figcaption><strong>현장 사진 {image_index}/{image_total}</strong>'
+                f'<figure>{img}<figcaption><strong>{media_label} {image_index}/{image_total}</strong>'
                 f'<span>{html.escape(caption)}</span></figcaption></figure>'
             )
-            if image_index % 3 == 0 and image_index < image_total:
+            if (
+                not explanatory_guide
+                and image_index % 3 == 0
+                and image_index < image_total
+            ):
                 parts.append(
                     '<aside class="post-media-note"><strong>사진에서 이어서 볼 부분</strong>'
                     f'<p>{html.escape(guide["media_note"])}</p></aside>'
                 )
-    if len(parts) == 3:
+    if rendered_element_count == 0:
         parts.append(
             "<p>이 포스팅의 현장 본문을 자동으로 가져오지 못했습니다. "
             f'<a href="{escape_attr(original_url)}" target="_blank" rel="noreferrer">원문 블로그</a>에서 내용을 확인해주세요.</p>'

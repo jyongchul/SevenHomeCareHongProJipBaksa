@@ -7,6 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from sync_naver_blog_full_posts import (
+    content_guide,
     has_dedicated_cover,
     infer_category,
     infer_tags,
@@ -89,6 +90,64 @@ class ExplanatoryGuideTests(unittest.TestCase):
         self.assertIn("이번 작업의 확인 포인트", rendered)
         self.assertNotIn("post-guide-figure", rendered)
         self.assertIn("현장 사진 1/1", rendered)
+
+    def test_wire_repair_uses_specific_guide_copy(self) -> None:
+        guide = content_guide(
+            {
+                "title": "성북구 3연동 중문 끊어진 와이어 교체",
+                "category": "중문수리",
+            }
+        )
+        self.assertIn("끊어진 와이어", guide["overview"])
+        self.assertNotIn("벨트, 롤러, 댐퍼", guide["overview"])
+
+    def test_dedicated_cover_omits_repeated_generic_media_notes(self) -> None:
+        post = {
+            "title": "성북구 3연동 중문 와이어 교체",
+            "url": "https://blog.naver.com/cadzone77/1",
+            "category": "중문수리",
+            "excerpt": "실제 작업 기록입니다.",
+            "elements": [
+                {
+                    "type": "image",
+                    "src": "https://example.com/00-cover-wire.jpg",
+                    "alt": "대표 이미지",
+                    "caption": "대표 이미지",
+                },
+                *[
+                    {
+                        "type": "image",
+                        "src": f"https://example.com/{index}.jpg",
+                        "alt": f"현장 사진 {index}",
+                        "caption": f"현장 사진 {index}",
+                    }
+                    for index in range(1, 7)
+                ],
+            ],
+        }
+        self.assertNotIn("사진에서 이어서 볼 부분", render_elements(post))
+
+    def test_local_actual_case_video_is_rendered_with_caption(self) -> None:
+        post = {
+            "title": "성북구 3연동 중문 와이어 교체",
+            "url": "https://blog.naver.com/cadzone77/1",
+            "category": "중문수리",
+            "excerpt": "실제 작업 기록입니다.",
+            "elements": [
+                {
+                    "type": "video",
+                    "src": "../assets/blog-local/example/before.mp4",
+                    "poster": "../assets/blog-local/example/before.jpg",
+                    "caption": "수리 전 연동 불량 확인 영상",
+                    "label": "수리 전 영상",
+                }
+            ],
+        }
+        rendered = render_elements(post)
+        self.assertIn("<video", rendered)
+        self.assertIn("controls", rendered)
+        self.assertIn("현장 영상 1/1", rendered)
+        self.assertIn("수리 전 연동 불량 확인 영상", rendered)
 
 
 if __name__ == "__main__":

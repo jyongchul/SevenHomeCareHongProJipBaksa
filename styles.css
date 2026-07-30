@@ -1768,8 +1768,16 @@ a {
 
 .post-image {
   border-radius: 8px;
-  border: 1px solid var(--line);
+  border: 0;
   background: var(--mist);
+}
+
+.post-video {
+  display: block;
+  width: 100%;
+  max-height: 720px;
+  background: #101615;
+  object-fit: contain;
 }
 
 .post-content figure.image-unavailable,

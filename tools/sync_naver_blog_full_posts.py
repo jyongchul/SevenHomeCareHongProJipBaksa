@@ -65,6 +65,12 @@ CONTENT_GUIDES = {
         "overview": "문짝 움직임과 레일, 벨트, 롤러, 댐퍼의 연결 상태를 함께 확인하고 필요한 부속을 교체한 뒤 작동감을 조정합니다.",
         "media_note": "전체 문짝의 정렬과 고장 부위를 함께 보면 부속 교체 전후의 움직임이 어떻게 달라졌는지 이해하기 쉽습니다.",
     },
+    "중문와이어": {
+        "image": "service-sliding-door.webp",
+        "alt": "3연동 중문의 와이어와 연동 장치를 점검하는 과정 설명 이미지",
+        "overview": "세 문짝이 따로 움직이는 증상과 끊어진 와이어를 확인하고, 연동 장치를 분리해 기존 선을 꺼낸 뒤 레일 홈을 정리하고 새 와이어로 교체했습니다.",
+        "media_note": "전체 문짝의 움직임, 끊어진 와이어, 분리한 연동 장치, 재조립 결과를 순서대로 보면 고장 원인과 수리 범위가 분명합니다.",
+    },
     "붙박이장": {
         "image": "service-closet-roller.webp",
         "alt": "붙박이장 슬라이딩 도어의 하부 롤러를 교체하는 과정 설명 이미지",
@@ -123,6 +129,25 @@ BLOGS = [
         "base": "https://blog.naver.com/wooju11m",
     },
 ]
+
+LOCAL_POST_VIDEOS = {
+    "224361560083": [
+        {
+            "after_text_contains": "수리 전에는 손잡이 쪽 문짝",
+            "src": "../assets/blog-local/224361560083/02-before-wire-repair.mp4",
+            "poster": "../assets/blog-local/224361560083/02-before-wire-repair.jpg",
+            "caption": "수리 전 문짝을 움직여 3연동 중문의 연동 불량을 확인한 영상",
+            "label": "수리 전 연동 불량 확인 영상",
+        },
+        {
+            "after_text_contains": "마무리 영상에서는 손잡이 쪽 문짝",
+            "src": "../assets/blog-local/224361560083/09-after-wire-repair.mp4",
+            "poster": "../assets/blog-local/224361560083/09-after-wire-repair.jpg",
+            "caption": "와이어 교체 후 세 문짝을 열고 닫으며 연동 움직임을 확인한 영상",
+            "label": "와이어 교체 후 연동 확인 영상",
+        },
+    ]
+}
 
 SKIP_TEXT_PATTERNS = (
     "본문 기타 기능",
@@ -397,6 +422,39 @@ def content_fingerprint(title: str, elements: list[dict[str, str]]) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def inject_local_verified_videos(
+    log_no: str, elements: list[dict[str, str]]
+) -> list[dict[str, str]]:
+    videos = LOCAL_POST_VIDEOS.get(log_no, [])
+    if not videos:
+        return elements
+
+    pending = {video["after_text_contains"]: video for video in videos}
+    result: list[dict[str, str]] = []
+    for element in elements:
+        result.append(element)
+        if element.get("type") != "text":
+            continue
+        content = element.get("content", "")
+        for marker, video in list(pending.items()):
+            if marker not in content:
+                continue
+            asset_path = SITE / video["src"].removeprefix("../")
+            poster_path = SITE / video["poster"].removeprefix("../")
+            if asset_path.is_file() and poster_path.is_file():
+                result.append(
+                    {
+                        "type": "video",
+                        "src": video["src"],
+                        "poster": video["poster"],
+                        "caption": video["caption"],
+                        "label": video["label"],
+                    }
+                )
+            pending.pop(marker)
+    return result
+
+
 def scrape_post(meta: PostMeta) -> dict[str, Any]:
     url = f"https://m.blog.naver.com/PostView.naver?blogId={meta.blog_id}&logNo={meta.log_no}"
     headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/126 Safari/537.36"}
@@ -456,6 +514,7 @@ def scrape_post(meta: PostMeta) -> dict[str, Any]:
                         link = href
             elements.append({"type": "image", "src": src, "alt": alt, "link": link, "caption": caption})
 
+    elements = inject_local_verified_videos(meta.log_no, elements)
     page_path = f"blog-pages/post-{meta.log_no}.html"
     image_elements = [element for element in elements if element.get("type") == "image"]
     source_thumbnail = next((element["src"] for element in image_elements), "")
@@ -707,6 +766,8 @@ def post_seo_description(post: dict[str, Any]) -> str:
 def content_guide(post: dict[str, Any]) -> dict[str, str]:
     title = post.get("title", "")
     category = post.get("category") or "생활보수"
+    if category == "중문수리" and "와이어" in title:
+        category = "중문와이어"
     if any(word in title for word in ("붙박이장", "장롱", "옷장", "롤러")):
         category = "붙박이장"
     return CONTENT_GUIDES.get(category, CONTENT_GUIDES["생활보수"])
@@ -758,6 +819,7 @@ def render_elements(post: dict[str, Any]) -> str:
     explanatory_guide = is_explanatory_guide(post)
     dedicated_cover = has_dedicated_cover(post)
     image_total = sum(element.get("type") == "image" for element in elements)
+    video_total = sum(element.get("type") == "video" for element in elements)
     excerpt = html.escape(normalize_public_text(post.get("excerpt") or fallback_excerpt(post.get("title", ""))))
     parts: list[str] = [f'<p class="post-lead">{excerpt}</p>']
     if not explanatory_guide:
@@ -776,6 +838,7 @@ def render_elements(post: dict[str, Any]) -> str:
                 '</figcaption></figure>'
             )
     image_index = 0
+    video_index = 0
     rendered_element_count = 0
     for element in elements:
         if element.get("type") == "text":
@@ -810,6 +873,7 @@ def render_elements(post: dict[str, Any]) -> str:
             )
             if (
                 not explanatory_guide
+                and not dedicated_cover
                 and image_index % 3 == 0
                 and image_index < image_total
             ):
@@ -817,6 +881,27 @@ def render_elements(post: dict[str, Any]) -> str:
                     '<aside class="post-media-note"><strong>사진에서 이어서 볼 부분</strong>'
                     f'<p>{html.escape(guide["media_note"])}</p></aside>'
                 )
+            continue
+        if element.get("type") == "video":
+            video_index += 1
+            rendered_element_count += 1
+            label = normalize_public_text(
+                element.get("label") or f"현장 영상 {video_index}"
+            )
+            caption = normalize_public_text(
+                element.get("caption") or "작업 전후 움직임을 확인한 현장 영상"
+            )
+            parts.append(
+                '<figure class="post-video-figure">'
+                f'<video class="post-video" controls preload="metadata" playsinline '
+                f'poster="{escape_attr(element.get("poster", ""))}" '
+                f'aria-label="{escape_attr(label)}">'
+                f'<source src="{escape_attr(element.get("src", ""))}" type="video/mp4" />'
+                "이 브라우저에서는 영상을 재생할 수 없습니다."
+                "</video>"
+                f"<figcaption><strong>현장 영상 {video_index}/{video_total}</strong>"
+                f"<span>{html.escape(caption)}</span></figcaption></figure>"
+            )
     if rendered_element_count == 0:
         parts.append(
             "<p>이 포스팅의 현장 본문을 자동으로 가져오지 못했습니다. "

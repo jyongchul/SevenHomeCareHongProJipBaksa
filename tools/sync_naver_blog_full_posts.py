@@ -740,28 +740,41 @@ def is_explanatory_guide(post: dict[str, Any]) -> bool:
     )
 
 
+def has_dedicated_cover(post: dict[str, Any]) -> bool:
+    for element in post.get("elements", []):
+        if element.get("type") != "image":
+            continue
+        src = str(element.get("src") or "").lower()
+        caption = normalize_public_text(element.get("caption", ""))
+        if "00-cover-" in src or "대표 이미지" in caption:
+            return True
+    return False
+
+
 def render_elements(post: dict[str, Any]) -> str:
     elements = post.get("elements", [])
     original_url = post["url"]
     guide = content_guide(post)
     explanatory_guide = is_explanatory_guide(post)
+    dedicated_cover = has_dedicated_cover(post)
     image_total = sum(element.get("type") == "image" for element in elements)
     excerpt = html.escape(normalize_public_text(post.get("excerpt") or fallback_excerpt(post.get("title", ""))))
     parts: list[str] = [f'<p class="post-lead">{excerpt}</p>']
     if not explanatory_guide:
-        parts.extend(
-            [
-                '<section class="post-work-overview" aria-labelledby="work-overview-title">'
-                '<h2 id="work-overview-title">이번 작업의 확인 포인트</h2>'
-                f'<p>{html.escape(guide["overview"])}</p></section>',
+        parts.append(
+            '<section class="post-work-overview" aria-labelledby="work-overview-title">'
+            '<h2 id="work-overview-title">이번 작업의 확인 포인트</h2>'
+            f'<p>{html.escape(guide["overview"])}</p></section>'
+        )
+        if not dedicated_cover:
+            parts.append(
                 '<figure class="post-guide-figure">'
                 f'<img class="post-image" src="../assets/visuals/{escape_attr(guide["image"])}" '
                 f'alt="{escape_attr(guide["alt"])}" width="1440" height="1080" loading="lazy" />'
                 '<figcaption><strong>작업 이해를 돕는 설명 이미지</strong>'
                 '<span>현장 이해를 위해 제작한 설명용 이미지이며, 실제 작업 기록은 아래 현장 사진에서 확인할 수 있습니다.</span>'
-                '</figcaption></figure>',
-            ]
-        )
+                '</figcaption></figure>'
+            )
     image_index = 0
     rendered_element_count = 0
     for element in elements:

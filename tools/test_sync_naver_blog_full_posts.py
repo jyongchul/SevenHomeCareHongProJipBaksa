@@ -7,6 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from sync_naver_blog_full_posts import (
+    has_dedicated_cover,
     infer_category,
     infer_tags,
     is_explanatory_guide,
@@ -66,6 +67,28 @@ class ExplanatoryGuideTests(unittest.TestCase):
         self.assertNotIn("service-home-hardware.webp", rendered)
         self.assertNotIn("현장 사진", rendered)
         self.assertIn("설명 이미지 1/1", rendered)
+
+    def test_actual_case_with_cover_omits_redundant_guide_visual(self) -> None:
+        post = {
+            "title": "성남 분당구 슬라이딩도어 수리",
+            "url": "https://blog.naver.com/tori_0815/1",
+            "category": "중문수리",
+            "excerpt": "실제 작업 기록입니다.",
+            "elements": [
+                {
+                    "type": "image",
+                    "src": "https://example.com/00-cover-sliding-door.jpg",
+                    "alt": "슬라이딩도어 수리 대표 이미지",
+                    "caption": "슬라이딩도어 수리 과정을 정리한 대표 이미지",
+                },
+                {"type": "text", "content": "현장 요청과 작업 기준"},
+            ],
+        }
+        self.assertTrue(has_dedicated_cover(post))
+        rendered = render_elements(post)
+        self.assertIn("이번 작업의 확인 포인트", rendered)
+        self.assertNotIn("post-guide-figure", rendered)
+        self.assertIn("현장 사진 1/1", rendered)
 
 
 if __name__ == "__main__":

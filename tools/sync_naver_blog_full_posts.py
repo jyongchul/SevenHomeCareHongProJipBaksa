@@ -146,7 +146,23 @@ LOCAL_POST_VIDEOS = {
             "caption": "와이어 교체 후 세 문짝을 열고 닫으며 연동 움직임을 확인한 영상",
             "label": "와이어 교체 후 연동 확인 영상",
         },
-    ]
+    ],
+    "224363565879": [
+        {
+            "after_text_contains": "빠른 닫힘 증상을 작업 전 움직임과 연결해 보는 자료입니다.",
+            "src": "../assets/blog-local/224363565879/02-before-damper-repair.mp4",
+            "poster": "../assets/blog-local/224363565879/02-before-damper-repair.jpg",
+            "caption": "댐퍼 교체 전 원슬라이딩 중문의 닫힘 움직임을 확인한 영상",
+            "label": "댐퍼 교체 전 닫힘 움직임 확인 영상",
+        },
+        {
+            "after_text_contains": "문짝의 이동 구간을 확인한 뒤 마무리했습니다.",
+            "src": "../assets/blog-local/224363565879/10-after-damper-repair.mp4",
+            "poster": "../assets/blog-local/224363565879/10-after-damper-repair.jpg",
+            "caption": "댐퍼 교체 후 재설치한 원슬라이딩 중문의 개폐 상태를 확인한 영상",
+            "label": "댐퍼 교체 후 개폐 상태 확인 영상",
+        },
+    ],
 }
 
 SKIP_TEXT_PATTERNS = (

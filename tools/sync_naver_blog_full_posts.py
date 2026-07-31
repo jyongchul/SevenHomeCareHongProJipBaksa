@@ -782,6 +782,13 @@ def post_seo_description(post: dict[str, Any]) -> str:
 def content_guide(post: dict[str, Any]) -> dict[str, str]:
     title = post.get("title", "")
     category = post.get("category") or "생활보수"
+    if "쾅 닫" in title and "댐퍼 교체" in title:
+        guide = dict(CONTENT_GUIDES["중문수리"])
+        guide["overview"] = (
+            "빠르게 닫히는 증상과 문짝 상부의 부속 배치를 확인하고, "
+            "고장 기록이 있는 댐퍼를 교체한 뒤 문짝 재설치와 개폐 상태를 점검합니다."
+        )
+        return guide
     if category == "중문수리" and "와이어" in title:
         category = "중문와이어"
     if any(word in title for word in ("붙박이장", "장롱", "옷장", "롤러")):

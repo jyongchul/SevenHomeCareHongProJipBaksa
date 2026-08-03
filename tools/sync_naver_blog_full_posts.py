@@ -149,14 +149,14 @@ LOCAL_POST_VIDEOS = {
     ],
     "224363565879": [
         {
-            "after_text_contains": "빠른 닫힘 증상을 작업 전 움직임과 연결해 보는 자료입니다.",
+            "after_text_contains": "교체 전 영상으로 문이 어느 지점에서 빨라지는지와 상부 쪽 움직임을 먼저 살폈습니다.",
             "src": "../assets/blog-local/224363565879/02-before-damper-repair.mp4",
             "poster": "../assets/blog-local/224363565879/02-before-damper-repair.jpg",
             "caption": "댐퍼 교체 전 원슬라이딩 중문의 닫힘 움직임을 확인한 영상",
             "label": "댐퍼 교체 전 닫힘 움직임 확인 영상",
         },
         {
-            "after_text_contains": "문짝의 이동 구간을 확인한 뒤 마무리했습니다.",
+            "after_text_contains": "교체 전 영상과 같은 상부 프레임과 유리 문짝이 보여 작업 전후의 움직임을 비교할 수 있습니다.",
             "src": "../assets/blog-local/224363565879/10-after-damper-repair.mp4",
             "poster": "../assets/blog-local/224363565879/10-after-damper-repair.jpg",
             "caption": "댐퍼 교체 후 재설치한 원슬라이딩 중문의 개폐 상태를 확인한 영상",
